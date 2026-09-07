@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import shutil
 import tempfile
 import zipfile
@@ -7,13 +8,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'upload'
-FULL_ZIP = ROOT / 'Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo.zip'
-OUTPUT = ROOT / 'Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo-COMPACT.zip'
-COMMIT = '750df4093370a6a0df774df205341f01d48872ee'
-FULL_URL = f'https://raw.githubusercontent.com/benjamin1734/Warext-Studios-Xenfero-Turkce-Yazim-Denetim-Eklentisi/{COMMIT}/Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo.zip'
+ADDON_JSON = SOURCE / 'src/addons/Warext/TurkishSpellCheck/addon.json'
+ADDON = json.loads(ADDON_JSON.read_text(encoding='utf-8'))
+VERSION = str(ADDON['version_string'])
+VERSION_ID = int(ADDON['version_id'])
+FULL_ZIP = ROOT / f'Warext-Turkce-Yazim-Denetimi-V{VERSION}-XenForo.zip'
+OUTPUT = ROOT / f'Warext-Turkce-Yazim-Denetimi-V{VERSION}-XenForo-COMPACT.zip'
+REF = os.environ.get('GITHUB_SHA') or 'main'
+FULL_URL = f'https://raw.githubusercontent.com/benjamin1734/Warext-Studios-Xenfero-Turkce-Yazim-Denetim-Eklentisi/{REF}/{FULL_ZIP.name}'
 
 if not SOURCE.is_dir() or not FULL_ZIP.is_file():
-    raise SystemExit('Kaynak upload dizini veya tam V1.0.4 ZIP bulunamadı.')
+    raise SystemExit(f'Kaynak upload dizini veya tam V{VERSION} ZIP bulunamadı.')
 
 full_sha256 = hashlib.sha256(FULL_ZIP.read_bytes()).hexdigest()
 
@@ -36,7 +41,7 @@ with tempfile.TemporaryDirectory(prefix='wtsc-compact-') as temp_dir:
         $this->installRuntimeAssets();
     }}
 
-    public function upgrade5300074Step1(): void
+    public function upgrade{VERSION_ID}Step1(): void
     {{
         $this->installRuntimeAssets();
     }}
@@ -58,7 +63,7 @@ with tempfile.TemporaryDirectory(prefix='wtsc-compact-') as temp_dir:
                 'sink' => $temporaryFile,
                 'timeout' => 90,
                 'connect_timeout' => 20,
-                'headers' => ['User-Agent' => 'Warext-TurkishSpellCheck/1.0.4']
+                'headers' => ['User-Agent' => 'Warext-TurkishSpellCheck/{VERSION}']
             ]);
             if ((int)$response->getStatusCode() !== 200)
             {{
@@ -141,17 +146,16 @@ with tempfile.TemporaryDirectory(prefix='wtsc-compact-') as temp_dir:
 
     if OUTPUT.exists():
         OUTPUT.unlink()
-    fixed = (2026, 9, 5, 0, 0, 0)
+    fixed = (2026, 9, 7, 0, 0, 0)
     with zipfile.ZipFile(OUTPUT, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-        for base in (stage_upload,):
-            for path in sorted(base.rglob('*')):
-                if not path.is_file():
-                    continue
-                arcname = Path('upload') / path.relative_to(stage_upload)
-                info = zipfile.ZipInfo(arcname.as_posix(), fixed)
-                info.compress_type = zipfile.ZIP_DEFLATED
-                info.external_attr = 0o644 << 16
-                archive.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
+        for path in sorted(stage_upload.rglob('*')):
+            if not path.is_file():
+                continue
+            arcname = Path('upload') / path.relative_to(stage_upload)
+            info = zipfile.ZipInfo(arcname.as_posix(), fixed)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o644 << 16
+            archive.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
         license_path = ROOT / 'LICENSE'
         info = zipfile.ZipInfo('LICENSE', fixed)
         info.compress_type = zipfile.ZIP_DEFLATED
