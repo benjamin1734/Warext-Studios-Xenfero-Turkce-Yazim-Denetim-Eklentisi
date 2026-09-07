@@ -1,4 +1,4 @@
-name: Warext XenForo V1.0.4
+name: Warext XenForo Release
 
 on:
   push:
@@ -27,11 +27,28 @@ jobs:
         shell: bash
         run: bash tools/build_release.sh
 
+      - name: Sürüm bilgisini doğrula
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('upload/src/addons/Warext/TurkishSpellCheck/addon.json').read_text(encoding='utf-8'))
+          print(data['version_string'])
+          PY
+          )"
+          PACKAGE="Warext-Turkce-Yazim-Denetimi-V${VERSION}-XenForo.zip"
+          test -f "$PACKAGE"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "package=$PACKAGE" >> "$GITHUB_OUTPUT"
+
       - name: Kurulum paketini artifact olarak yükle
         uses: actions/upload-artifact@v4
         with:
-          name: Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo
-          path: Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo.zip
+          name: Warext-Turkce-Yazim-Denetimi-V${{ steps.meta.outputs.version }}-XenForo
+          path: ${{ steps.meta.outputs.package }}
           if-no-files-found: error
           retention-days: 90
 
@@ -43,8 +60,35 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then
-            exit 0
+          if ! git diff --cached --quiet; then
+            git commit -m "V${{ steps.meta.outputs.version }}"
+            git push
           fi
-          git commit -m "V1.0.4"
-          git push
+
+      - name: GitHub Release oluştur veya güncelle
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          PACKAGE: ${{ steps.meta.outputs.package }}
+        run: |
+          set -euo pipefail
+          TAG="V${VERSION}"
+          git fetch origin main
+          TARGET="$(git rev-parse origin/main)"
+          cat > /tmp/warext-release-notes.md <<EOF
+          Warext Studios | Türkçe Yazım Denetimi ${TAG}
+
+          XenForo 2.3+ için doğrudan kurulabilir doğrulanmış paket.
+
+          Bu sürümde bağlama duyarlı yazım denetimi, morfolojik aday doğrulaması, yerel dil modeli sıralaması ve V3.1.2 regresyon kontrolleri bulunur.
+
+          Kurulum: Release altındaki **${PACKAGE}** dosyasını indirin ve XenForo ACP → Add-ons → Install/upgrade from archive alanından yükleyin.
+          EOF
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$PACKAGE" --clobber
+            gh release edit "$TAG" --title "$TAG" --notes-file /tmp/warext-release-notes.md
+          else
+            gh release create "$TAG" "$PACKAGE" --target "$TARGET" --title "$TAG" --notes-file /tmp/warext-release-notes.md
+          fi
