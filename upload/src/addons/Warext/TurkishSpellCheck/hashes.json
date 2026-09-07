@@ -1,5 +1,5 @@
 {
-    "js/warext/turkish-spellcheck/bootstrap-v110.js": "1a08c91b6a826fd11960b6c28f2473520abd06cbeda4b2d1583035fc97df558c",
+    "js/warext/turkish-spellcheck/bootstrap-v110.js": "b7219cda3ccbf8ba7c5d86543b13878974df6b45598df9e0ab50c44ddf0a67f3",
     "js/warext/turkish-spellcheck/context-tuning-v231.js": "0a9ba5ada265744845d5c954de060249de12b33ce99fd7546afd0d626c59b17c",
     "js/warext/turkish-spellcheck/context-v230.js": "3605e6d81526711a57043e2b8e81eae9d0caf1dba59f6822c197bb9788da078f",
     "js/warext/turkish-spellcheck/contextual-orthography-guard-v312.js": "2861444aa670ee69df26a7d7b2993bb7065d6f3e79bbf42a90fb82142e908c67",
@@ -11,6 +11,7 @@
     "js/warext/turkish-spellcheck/editor-v110.js": "6dd2fced6d60d5e249735aeb82d82ee38e4ad954e27c15640f07aa6494beb904",
     "js/warext/turkish-spellcheck/entities-v200.js": "ad01565860bbdc1a6ef7d773b875215461ba1cd1f8c433b403e234c25d5a498c",
     "js/warext/turkish-spellcheck/idioms-v200.js": "7c73cd2cdcf524e1bb4be5de8e12859b46fd94ef5186eed2a4612a04eaa3a235",
+    "js/warext/turkish-spellcheck/integration-v105.js": "a9b0a48ebaa9ec12f7293363acd60da4dfea6d650da14eaffba2acac940bcdff",
     "js/warext/turkish-spellcheck/knowledge-v200.js": "25c3138bd453aff7af10460bfe20360d038257484f45cb682de68eb99c225990",
     "js/warext/turkish-spellcheck/language-v110.js": "a5b7c1d63bba7b4996f17a9f09afb268e6901888ebdf9ed01a94cfceafbe7140",
     "js/warext/turkish-spellcheck/learning-v200.js": "76bbec3ebab04e40f8ac2700cf2847d02723de271039c993c63488e6884f937b",
@@ -37,7 +38,7 @@
     "js/warext/turkish-spellcheck/syntax-v220.js": "a9a892e5ff1ab4a961a7263957a7d3ece568c7ef01bdad46c83aaece59d0b8de",
     "js/warext/turkish-spellcheck/text-core-v110.js": "a5d237d3747f01b49ecd61d7496fd49d6970bb207a8e7a171ba307e264834b0b",
     "src/addons/Warext/TurkishSpellCheck/Admin/Controller/Learning.php": "9bc7bd27e2c0ba0145532b20d52d677ea607f58460cbd1936708647fcea24f66",
-    "src/addons/Warext/TurkishSpellCheck/CHANGELOG.md": "2cf1d2e10663c52cc98e6781c66f0a1bf7628c4f09aa6e9d4c8edb74ab041f00",
+    "src/addons/Warext/TurkishSpellCheck/CHANGELOG.md": "521b1c6981fc32d109e599bf1868a31c06b2913cc464df2652f269cf2c447bc0",
     "src/addons/Warext/TurkishSpellCheck/Pub/Controller/Feedback.php": "db13f1c5f65dca88672d1878eb11775aeb25bcde6b98fce11b8179a37af9cf5c",
     "src/addons/Warext/TurkishSpellCheck/Resources/LICENSE-MPL-2.0.txt": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
     "src/addons/Warext/TurkishSpellCheck/Resources/LICENSE-TURKISH-DIALOGUES-CC-BY-4.0.txt": "dcbe9d3097e6133b741c26c33f23cd6ad8a38cedf57988b33e7b3898e7bf7727",
@@ -58,6 +59,6 @@
     "src/addons/Warext/TurkishSpellCheck/_data/options.xml": "afaf5926d69ccbb10268950f8376dfa21d5d0299803c02432b9ac8d3dcc5dcb7",
     "src/addons/Warext/TurkishSpellCheck/_data/phrases.xml": "455bb766e9d994c607014e7f0d3204630337755c46700610ac84c51ca7040d1f",
     "src/addons/Warext/TurkishSpellCheck/_data/routes.xml": "15ecdebc88031ec618b4bc3831c3083e46fda60121b525e1bca746ae0c516c51",
-    "src/addons/Warext/TurkishSpellCheck/_data/template_modifications.xml": "2302878305a5f612803a5e7b5c09ea456ff0aa6042bac15bc25983b65efd7037",
-    "src/addons/Warext/TurkishSpellCheck/addon.json": "76574148c7f9326bef0727d4e29b3e73c3a843c58b04ef7118c001000df89811"
+    "src/addons/Warext/TurkishSpellCheck/_data/template_modifications.xml": "101c8f0bb7629cf611e77301e4050ec2c14513fb42e6be981319f0bc7896ffc9",
+    "src/addons/Warext/TurkishSpellCheck/addon.json": "618096418ed9f1818dfa3fff2e94c1325a43be02032efdecee229e144843e3d7"
 }
