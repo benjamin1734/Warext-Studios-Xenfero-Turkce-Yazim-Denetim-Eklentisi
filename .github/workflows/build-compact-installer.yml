@@ -1,4 +1,4 @@
-name: Warext V1.0.4 Compact Installer
+name: Warext Compact Installer
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: warext-spell-check-compact-${{ github.ref }}
@@ -20,25 +20,65 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sürüm bilgisini hazırla
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('upload/src/addons/Warext/TurkishSpellCheck/addon.json').read_text(encoding='utf-8'))
+          print(data['version_string'])
+          PY
+          )"
+          PACKAGE="Warext-Turkce-Yazim-Denetimi-V${VERSION}-XenForo-COMPACT.zip"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "package=$PACKAGE" >> "$GITHUB_OUTPUT"
 
       - name: 1 MB altı özellik-tam kurulum paketini üret
+        shell: bash
         run: |
+          set -euo pipefail
           python3 tools/build_compact_installer.py
           python3 tools/harden_compact_installer.py
+          test -f "${{ steps.meta.outputs.package }}"
 
       - name: PHP kurulum kodunu doğrula
+        shell: bash
         run: |
           set -euo pipefail
           rm -rf /tmp/wtsc-compact-check
           mkdir -p /tmp/wtsc-compact-check
-          unzip -q Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo-COMPACT.zip -d /tmp/wtsc-compact-check
+          unzip -q "${{ steps.meta.outputs.package }}" -d /tmp/wtsc-compact-check
           php -l /tmp/wtsc-compact-check/upload/src/addons/Warext/TurkishSpellCheck/Setup.php
-          unzip -tq Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo-COMPACT.zip
+          unzip -tq "${{ steps.meta.outputs.package }}"
 
       - name: Compact kurulum paketini artifact olarak yükle
         uses: actions/upload-artifact@v4
         with:
-          name: Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo-COMPACT
-          path: Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo-COMPACT.zip
+          name: Warext-Turkce-Yazim-Denetimi-V${{ steps.meta.outputs.version }}-XenForo-COMPACT
+          path: ${{ steps.meta.outputs.package }}
           if-no-files-found: error
           retention-days: 90
+
+      - name: Compact paketi GitHub Release'a ekle
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          PACKAGE: ${{ steps.meta.outputs.package }}
+        run: |
+          set -euo pipefail
+          TAG="V${VERSION}"
+          git fetch origin main
+          TARGET="$(git rev-parse origin/main)"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$PACKAGE" --clobber
+          else
+            gh release create "$TAG" "$PACKAGE" --target "$TARGET" --title "$TAG" --notes "Warext Studios | Türkçe Yazım Denetimi ${TAG} - XenForo 2.3+ doğrudan kurulum paketleri."
+          fi
