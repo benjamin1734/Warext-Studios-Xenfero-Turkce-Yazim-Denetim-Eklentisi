@@ -6,9 +6,9 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-VERSION_STRING = '1.0.4'
-VERSION_ID = 5300074
-PACKAGE_NAME = 'Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo.zip'
+VERSION_STRING = '1.0.5'
+VERSION_ID = 5300075
+PACKAGE_NAME = 'Warext-Turkce-Yazim-Denetimi-V1.0.5-XenForo.zip'
 ADDON_REL = Path('src/addons/Warext/TurkishSpellCheck')
 RUNTIME_REL = Path('js/warext/turkish-spellcheck')
 TEXT_SUFFIXES = {'.php', '.js', '.py', '.sh', '.json', '.xml', '.yml', '.yaml', '.md', '.txt', '.gitignore'}
@@ -104,7 +104,7 @@ def check_addon(root):
     missing = sorted(referenced - option_ids)
     if missing:
         fail('Template içinde tanımsız option bulundu: ' + ', '.join(missing))
-    if template.count('?wtsc=3120') < 2:
+    if template.count('?wtsc=3121') < 2:
         fail('V3.1.2 önbellek kırıcı template bağlantısı eksik')
     if "link('warext-spell-feedback')" not in template:
         fail('Yerel geri bildirim route bağlantısı eksik')
@@ -114,7 +114,7 @@ def check_runtime(root):
     runtime = root / 'upload' / RUNTIME_REL
     bootstrap_path = runtime / 'bootstrap-v110.js'
     bootstrap = read_text(bootstrap_path)
-    if "const VERSION = '1.0.4';" not in bootstrap or "const ASSET_VERSION = '3120';" not in bootstrap:
+    if "const VERSION = '1.0.5';" not in bootstrap or "const ASSET_VERSION = '3121';" not in bootstrap:
         fail('Bootstrap sürümü geçersiz')
     if "dataset.wtscSemantic = 'v312'" not in bootstrap:
         fail('V3.1.2 çalışma zamanı işareti eksik')
@@ -125,7 +125,8 @@ def check_runtime(root):
         'quality-v210.js', 'quality-v220.js', 'syntax-v220.js', 'syntax-tuning-v220.js', 'semantic-ui-v110.js',
         'context-v230.js', 'context-tuning-v231.js', 'semantic-model-v300.js', 'semantic-knowledge-v310.js', 'runtime-v240.js',
         'semantic-document-v300.js', 'semantic-tuning-v301.js', 'semantic-tuning-v302.js', 'semantic-reasoning-v310.js',
-        'semantic-reasoning-tuning-v311.js', 'contextual-orthography-v312.js', 'editor-v110.js', 'longtext-v110.js', 'document-v300.js'
+        'semantic-reasoning-tuning-v311.js', 'contextual-orthography-v312.js', 'integration-v105.js', 'editor-v110.js',
+        'longtext-v110.js', 'document-v300.js'
     }
     loaded = set(re.findall(r"loadScript\('([^']+\.js)'", bootstrap))
     disk = {path.name for path in runtime.glob('*.js') if path.name != 'bootstrap-v110.js'}
