@@ -2,15 +2,21 @@
 
 XenForo 2.3+ için tamamen yerel çalışan Türkçe yazım, dilbilgisi, noktalama, anlam ve paragraf bütünlüğü denetimi eklentisi.
 
-## Doğrudan kurulum
+## İndirme ve doğrudan kurulum
 
-Kurulum dosyası:
+Güncel kararlı sürüm GitHub **Releases** bölümünde `V1.0.4` olarak yayımlanır.
+
+Önerilen tam kurulum paketi:
 
 `Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo.zip`
 
-ZIP dosyasını çıkarmadan XenForo yönetim panelindeki **Add-ons → Install/upgrade from archive** alanına yükleyin.
+Daha küçük alternatif paket:
 
-V1.0.4 önceki sürümlerin üzerine doğrudan yükseltilebilir. Statik çalışma zamanı dosyalarında sürüm anahtarlı önbellek kırma kullanılır.
+`Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo-COMPACT.zip`
+
+ZIP dosyasını çıkarmadan XenForo yönetim panelindeki **Add-ons → Install/upgrade from archive** alanına yükleyin. V1.0.4 önceki sürümlerin üzerine doğrudan yükseltilebilir. Statik çalışma zamanı dosyalarında sürüm anahtarlı önbellek kırma kullanılır.
+
+Yeni sürümlerde paketleme işlemi tamamlandığında tam ve compact kurulum arşivleri aynı GitHub Release sürümüne otomatik eklenir; sürüm numarası `addon.json` içinden alınır.
 
 ## Yerel V3.1.2 dil ve anlam motoru
 
