@@ -4,8 +4,8 @@
   if (window.__warextWritingIntegrationV105) return;
   window.__warextWritingIntegrationV105 = true;
 
-  const BRIDGE_VERSION = '1.0.0';
-  const ADDON_VERSION = '1.0.5';
+  const BRIDGE_VERSION = '1.1.0';
+  const ADDON_VERSION = '1.0.6';
   const STORAGE_KEY = 'warextWritingIntegration:v105';
   const MAX_EVENTS = 40;
   let beforeSnapshot = null;
@@ -15,11 +15,16 @@
     'input[name="title"], textarea[name="message"], textarea[data-original-name="message"], .fr-element[contenteditable="true"]'
   ));
 
+  function surfaceField(el) {
+    if (el instanceof HTMLInputElement && el.name === 'title') return 'title';
+    return 'message';
+  }
+
   function surfaceKey(el, index) {
     if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
       return `${el.tagName}:${el.name || el.dataset.originalName || 'field'}:${index}`;
     }
-    return `rich:${index}`;
+    return `rich:message:${index}`;
   }
 
   function surfaceText(el) {
@@ -29,7 +34,7 @@
   }
 
   function takeSnapshot() {
-    return surfaces().map((el, index) => ({ key: surfaceKey(el, index), text: surfaceText(el), index }));
+    return surfaces().map((el, index) => ({ key: surfaceKey(el, index), field: surfaceField(el), text: surfaceText(el), index }));
   }
 
   function diff(before, after) {
@@ -57,9 +62,44 @@
     };
   }
 
+  function emptyFieldState() {
+    return { correctionCount:0, changedChars:0, insertedChars:0, removedChars:0 };
+  }
+
+  function normalizeFields(parsed) {
+    const fields = { title:emptyFieldState(), message:emptyFieldState() };
+    if (parsed && typeof parsed === 'object') {
+      for (const name of ['title','message']) {
+        const source = parsed[name];
+        if (!source || typeof source !== 'object') continue;
+        fields[name] = {
+          correctionCount: Math.max(0, Number(source.correctionCount || 0)),
+          changedChars: Math.max(0, Number(source.changedChars || 0)),
+          insertedChars: Math.max(0, Number(source.insertedChars || 0)),
+          removedChars: Math.max(0, Number(source.removedChars || 0))
+        };
+      }
+    }
+    return fields;
+  }
+
+  function deriveFields(events) {
+    const fields = { title:emptyFieldState(), message:emptyFieldState() };
+    for (const event of events) {
+      const name = event?.field === 'title' ? 'title' : 'message';
+      fields[name].correctionCount += 1;
+      fields[name].changedChars += Math.max(0, Number(event?.changedChars || 0));
+      fields[name].insertedChars += Math.max(0, Number(event?.insertedLength || 0));
+      fields[name].removedChars += Math.max(0, Number(event?.removedLength || 0));
+    }
+    return fields;
+  }
+
   function loadState() {
     try {
       const parsed = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+      const events = Array.isArray(parsed.events) ? parsed.events.slice(-MAX_EVENTS) : [];
+      const fields = parsed.fields && typeof parsed.fields === 'object' ? normalizeFields(parsed.fields) : deriveFields(events);
       return {
         sessionId: parsed.sessionId || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
         firstCorrectionAt: Number(parsed.firstCorrectionAt || 0),
@@ -68,7 +108,8 @@
         changedChars: Number(parsed.changedChars || 0),
         insertedChars: Number(parsed.insertedChars || 0),
         removedChars: Number(parsed.removedChars || 0),
-        events: Array.isArray(parsed.events) ? parsed.events.slice(-MAX_EVENTS) : []
+        fields,
+        events
       };
     } catch (_) {
       return {
@@ -79,6 +120,7 @@
         changedChars: 0,
         insertedChars: 0,
         removedChars: 0,
+        fields: { title:emptyFieldState(), message:emptyFieldState() },
         events: []
       };
     }
@@ -108,9 +150,10 @@
     if (!best || best.delta.changedChars <= 0) return;
 
     const stamp = now();
+    const field = best.previous.field === 'title' ? 'title' : 'message';
     const event = {
       at: stamp,
-      field: best.previous.key.split(':')[1] || 'message',
+      field,
       beforeLength: best.delta.beforeLength,
       afterLength: best.delta.afterLength,
       removedLength: best.delta.removedLength,
@@ -125,6 +168,10 @@
     state.changedChars += event.changedChars;
     state.insertedChars += event.insertedLength;
     state.removedChars += event.removedLength;
+    state.fields[field].correctionCount += 1;
+    state.fields[field].changedChars += event.changedChars;
+    state.fields[field].insertedChars += event.insertedLength;
+    state.fields[field].removedChars += event.removedLength;
     state.events.push(event);
     state.events = state.events.slice(-MAX_EVENTS);
     persist();
@@ -144,7 +191,11 @@
       insertedChars: state.insertedChars,
       removedChars: state.removedChars,
       firstCorrectionAt: state.firstCorrectionAt,
-      lastCorrectionAt: state.lastCorrectionAt
+      lastCorrectionAt: state.lastCorrectionAt,
+      fields: {
+        title: { ...state.fields.title },
+        message: { ...state.fields.message }
+      }
     };
   }
 
@@ -157,6 +208,7 @@
       changedChars: 0,
       insertedChars: 0,
       removedChars: 0,
+      fields: { title:emptyFieldState(), message:emptyFieldState() },
       events: []
     };
     persist();
