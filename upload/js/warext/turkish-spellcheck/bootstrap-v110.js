@@ -4,8 +4,8 @@
   if (window.__warextTurkishSpellBootstrapV110) return;
   window.__warextTurkishSpellBootstrapV110 = true;
 
-  const VERSION = '1.0.4';
-  const ASSET_VERSION = '3120';
+  const VERSION = '1.0.5';
+  const ASSET_VERSION = '3121';
   const script = document.currentScript;
   const scriptUrl = script?.src || '';
   const baseDir = scriptUrl ? scriptUrl.slice(0,scriptUrl.lastIndexOf('/') + 1) : '';
@@ -95,6 +95,7 @@
       await loadScript('contextual-orthography-rerank-v312.js',() => !!window.__warextContextualOrthographyRerankV312);
       await loadScript('contextual-orthography-guard-v312.js',() => !!window.__warextContextualOrthographyGuardV312);
       if (!window.WarextTurkishSpellEngineV110) throw new Error('engine');
+      await loadScript('integration-v105.js',() => !!window.WarextWritingIntegration);
       await loadScript('editor-v110.js',() => !!window.__warextTurkishSpellCheckV110);
       await loadScript('longtext-v110.js',() => !!window.__warextLongTextV110);
       await loadScript('document-v300.js',() => !!window.__warextDocumentV300);
