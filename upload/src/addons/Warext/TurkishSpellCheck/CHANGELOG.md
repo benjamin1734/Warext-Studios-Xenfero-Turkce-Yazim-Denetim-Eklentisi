@@ -1,5 +1,14 @@
 # Değişiklik Geçmişi
 
+## V1.0.5
+
+- Warext AI İçerik Denetim Sistemi ve benzeri eklentiler için opsiyonel entegrasyon köprüsü eklendi
+- Entegrasyon zorunlu bağımlılık oluşturmaz; Yazım Denetimi tek başına aynı şekilde çalışmaya devam eder
+- Kabul edilen yazım önerilerinin sayısı, eklenen/silinen/değişen karakter miktarı ve işlem zamanları oturum bazlı özetlenir
+- Entegrasyon verisi `window.WarextWritingIntegration` üzerinden okunabilir
+- Tam kullanıcı metni entegrasyon özetinde saklanmaz
+- Yeni köprü yalnızca editör bulunduğunda yüklenir ve mevcut V3.1.2 analiz motoruna müdahale etmez
+
 ## V1.0.4
 
 - V3.1.2 bağlama duyarlı çoklu-harf yazım onarımı
