@@ -21,12 +21,12 @@
  data-long-text-segment-size="{$xf.options.warextSpellLongTextSegmentSize}"></div>
 <textarea id="wtsc-custom-words" hidden>{$xf.options.warextSpellCustomWords}</textarea>
 <textarea id="wtsc-custom-proper-names" hidden>{$xf.options.warextSpellCustomProperNames}</textarea>
-<script src="{{ base_url('js/warext/turkish-spellcheck/bootstrap-v110.js') }}?wtsc=3120"></script>
+<script src="{{ base_url('js/warext/turkish-spellcheck/bootstrap-v110.js') }}?wtsc=3121"></script>
 $0]]></replace>
   </modification>
   <modification type="public" template="editor" modification_key="warext_turkish_spellcheck_editor_loader" description="Warext Türkçe yazım denetimi yedek yükleyicisi" execution_order="100" enabled="1" action="str_replace">
     <find><![CDATA[<!--[XF:include_js]-->]]></find>
     <replace><![CDATA[$0
-<script src="{{ base_url('js/warext/turkish-spellcheck/bootstrap-v110.js') }}?wtsc=3120"></script>]]></replace>
+<script src="{{ base_url('js/warext/turkish-spellcheck/bootstrap-v110.js') }}?wtsc=3121"></script>]]></replace>
   </modification>
 </template_modifications>
