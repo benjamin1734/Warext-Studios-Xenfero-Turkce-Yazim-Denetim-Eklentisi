@@ -2,7 +2,16 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PACKAGE="Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo.zip"
+VERSION="$(python3 - "$ROOT" <<'PY'
+import json
+import sys
+from pathlib import Path
+root=Path(sys.argv[1])
+data=json.loads((root/'upload/src/addons/Warext/TurkishSpellCheck/addon.json').read_text(encoding='utf-8'))
+print(data['version_string'])
+PY
+)"
+PACKAGE="Warext-Turkce-Yazim-Denetimi-V${VERSION}-XenForo.zip"
 RUNTIME="$ROOT/upload/js/warext/turkish-spellcheck"
 ADDON="$ROOT/upload/src/addons/Warext/TurkishSpellCheck"
 
@@ -46,7 +55,7 @@ node "$ROOT/tests/v312-contextual-orthography-regression.js"
 
 python3 "$ROOT/tools/final_audit.py" "$ROOT"
 
-rm -f "$ROOT/Warext-Turkce-Yazim-Denetimi-V1-XenForo.zip" "$ROOT/Warext-Turkce-Yazim-Denetimi-V1.0.1-XenForo.zip" "$ROOT/Warext-Turkce-Yazim-Denetimi-V1.0.2-XenForo.zip" "$ROOT/Warext-Turkce-Yazim-Denetimi-V1.0.3-XenForo.zip" "$ROOT/$PACKAGE"
+find "$ROOT" -maxdepth 1 -type f -name 'Warext-Turkce-Yazim-Denetimi-V*-XenForo.zip' -delete
 cd "$ROOT"
 zip -qr "$PACKAGE" upload LICENSE
 unzip -tq "$PACKAGE"
