@@ -6,13 +6,15 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = ROOT / 'Warext-Turkce-Yazim-Denetimi-V1.0.4-XenForo-COMPACT.zip'
+ADDON = json.loads((ROOT / 'upload/src/addons/Warext/TurkishSpellCheck/addon.json').read_text(encoding='utf-8'))
+VERSION = str(ADDON['version_string'])
+ARCHIVE = ROOT / f'Warext-Turkce-Yazim-Denetimi-V{VERSION}-XenForo-COMPACT.zip'
 
 if not ARCHIVE.is_file():
     raise SystemExit('Compact ZIP bulunamadı.')
 
 old_check = '''            if ($written < 30)\n            {\n                throw new \\RuntimeException('Yazım denetimi çalışma zamanı paketi eksik görünüyor.');\n            }'''
-new_check = '''            $requiredRuntimeFiles = [\n                'bootstrap-v110.js',\n                'dictionary-v110.js',\n                'corrections-v110.js',\n                'lexicon-v200.js',\n                'entities-v200.js',\n                'lm-v200.js',\n                'idioms-v200.js',\n                'engine-v200.js',\n                'panel-v200.js'\n            ];\n            foreach ($requiredRuntimeFiles as $requiredRuntimeFile)\n            {\n                $requiredRuntimePath = $root . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'warext' . DIRECTORY_SEPARATOR . 'turkish-spellcheck' . DIRECTORY_SEPARATOR . $requiredRuntimeFile;\n                if (!is_file($requiredRuntimePath) || filesize($requiredRuntimePath) <= 0)\n                {\n                    throw new \\RuntimeException('Yazım denetimi çalışma zamanı paketi eksik: ' . $requiredRuntimeFile);\n                }\n            }'''
+new_check = '''            $requiredRuntimeFiles = [\n                'bootstrap-v110.js',\n                'dictionary-v110.js',\n                'corrections-v110.js',\n                'lexicon-v200.js',\n                'entities-v200.js',\n                'lm-v200.js',\n                'idioms-v200.js',\n                'engine-v200.js',\n                'panel-v200.js',\n                'integration-v105.js'\n            ];\n            foreach ($requiredRuntimeFiles as $requiredRuntimeFile)\n            {\n                $requiredRuntimePath = $root . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'warext' . DIRECTORY_SEPARATOR . 'turkish-spellcheck' . DIRECTORY_SEPARATOR . $requiredRuntimeFile;\n                if (!is_file($requiredRuntimePath) || filesize($requiredRuntimePath) <= 0)\n                {\n                    throw new \\RuntimeException('Yazım denetimi çalışma zamanı paketi eksik: ' . $requiredRuntimeFile);\n                }\n            }'''
 
 with tempfile.TemporaryDirectory(prefix='wtsc-compact-harden-') as temp_dir:
     stage = Path(temp_dir)
@@ -34,7 +36,7 @@ with tempfile.TemporaryDirectory(prefix='wtsc-compact-harden-') as temp_dir:
     hashes_path.write_text(json.dumps(hashes, ensure_ascii=False, indent=4) + '\n', encoding='utf-8')
 
     hardened = stage / 'hardened.zip'
-    fixed = (2026, 9, 5, 0, 0, 0)
+    fixed = (2026, 9, 7, 0, 0, 0)
     with zipfile.ZipFile(hardened, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as target:
         for path in sorted(stage.rglob('*')):
             if not path.is_file() or path == hardened:
