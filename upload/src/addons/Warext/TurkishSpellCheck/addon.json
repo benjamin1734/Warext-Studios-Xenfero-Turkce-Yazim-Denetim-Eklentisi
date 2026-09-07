@@ -1,9 +1,9 @@
 {
     "legacy_addon_id": "",
     "title": "Warext Studios | Türkçe Yazım Denetimi",
-    "description": "Tamamen yerel Türkçe yazım, dilbilgisi, noktalama ve belge düzeyi anlam denetimi. V3.1.2; önerme grafiğine ek olarak bağlama duyarlı çoklu-harf yazım onarımı, tamlayan-tamlanan uyumu, yerel dil modeli ve morfolojik kök doğrulamasıyla gerçek cümle içindeki kaçırılan yazım hatalarını analiz eder. Harici API, model veya servis gerekmez.",
-    "version_id": 5300074,
-    "version_string": "1.0.4",
+    "description": "Tamamen yerel Türkçe yazım, dilbilgisi, noktalama ve belge düzeyi anlam denetimi. V3.1.2; önerme grafiğine ek olarak bağlama duyarlı çoklu-harf yazım onarımı, tamlayan-tamlanan uyumu, yerel dil modeli ve morfolojik kök doğrulamasıyla gerçek cümle içindeki kaçırılan yazım hatalarını analiz eder. V1.0.5 ile bağımsız AI içerik denetimi eklentileri için opsiyonel entegrasyon köprüsü sağlar. Harici API, model veya servis gerekmez.",
+    "version_id": 5300075,
+    "version_string": "1.0.5",
     "dev": "Warext Studios",
     "dev_url": "",
     "faq_url": "",
