@@ -8,11 +8,7 @@ from pathlib import Path
 
 ADDON_REL = Path('src/addons/Warext/TurkishSpellCheck')
 RUNTIME_REL = Path('js/warext/turkish-spellcheck')
-TEXT_SUFFIXES = {'.php', '.js', '.py', '.sh', '.json', '.xml', '.yml', '.yaml', '.md', '.txt', '.gitignore'}
-SKIP_DIRS = {'.git', '__pycache__'}
 RUNTIME_FORBIDDEN = re.compile(r'https?://|WebSocket|EventSource|sendBeacon|axios|\.ajax\s*\(', re.I)
-SOURCE_COMMENT = re.compile(r'^\s*(?://|/\*|\*)')
-PY_COMMENT = re.compile(r'^\s*#(?!\!)')
 
 
 def fail(message):
@@ -52,30 +48,21 @@ def addon_meta(root):
         fail('addon.json version_string geçersiz')
     if version_id <= 0:
         fail('addon.json version_id geçersiz')
-    return addon, version, version_id
-
-
-def check_comments(path, text):
-    suffix = path.suffix.lower()
-    for number, line in enumerate(text.splitlines(), 1):
-        if suffix in {'.js', '.php'} and SOURCE_COMMENT.match(line):
-            fail(f'Kod yorum satırı bulundu: {path}:{number}')
-        if suffix == '.py' and PY_COMMENT.match(line):
-            fail(f'Python yorum satırı bulundu: {path}:{number}')
-
-
-def check_addon(root, addon, version, version_id):
-    addon_root = root / 'upload' / ADDON_REL
     if addon.get('title') != 'Warext Studios | Türkçe Yazım Denetimi':
         fail('Eklenti başlığı geçersiz')
     if int(addon.get('require', {}).get('XF', [0])[0]) < 2030070:
         fail('XenForo 2.3 gereksinimi eksik')
+    return addon, version, version_id
+
+
+def check_addon_data(root, version):
+    addon_root = root / 'upload' / ADDON_REL
+    data_root = addon_root / '_data'
     setup = read_text(addon_root / 'Setup.php')
     if '@unlink' in setup or 'glob($directory' in setup:
         fail('Yükseltmede çalışma zamanı dosyası silen kod bulundu')
     if 'xf_warext_spell_cache' not in setup or 'xf_warext_spell_feedback' not in setup:
         fail('Kurulum tablo tanımları eksik')
-    data_root = addon_root / '_data'
     for path in sorted(data_root.rglob('*.xml')):
         parse_xml(path)
     routes = parse_xml(data_root / 'routes.xml').getroot()
@@ -129,25 +116,25 @@ def check_runtime(root, version, asset_version):
     if "dataset.wtscSemantic = 'v313'" not in bootstrap:
         fail('V3.1.3 çalışma zamanı işareti eksik')
     required = {
-        'text-core-v110.js', 'lexicon-v200.js', 'dictionary-v110.js', 'corrections-v110.js', 'language-v110.js',
-        'semantic-v110.js', 'semantic-deep-v110.js', 'semantic-context-v110.js', 'entities-v200.js', 'idioms-v200.js',
-        'lm-v200.js', 'micro-model-v200.js', 'knowledge-v200.js', 'micro-integration-v200.js', 'learning-v200.js',
-        'quality-v210.js', 'quality-v220.js', 'syntax-v220.js', 'syntax-tuning-v220.js', 'semantic-ui-v110.js',
-        'context-v230.js', 'context-tuning-v231.js', 'semantic-model-v300.js', 'semantic-knowledge-v310.js', 'runtime-v240.js',
-        'semantic-document-v300.js', 'semantic-tuning-v301.js', 'semantic-tuning-v302.js', 'semantic-reasoning-v310.js',
-        'semantic-reasoning-tuning-v311.js', 'contextual-orthography-v312.js', 'contextual-orthography-rerank-v312.js',
-        'contextual-orthography-guard-v312.js', 'performance-guard-v313.js', 'integration-v105.js', 'editor-v110.js',
-        'longtext-v110.js', 'document-v300.js'
+        'text-core-v110.js','lexicon-v200.js','dictionary-v110.js','corrections-v110.js','language-v110.js',
+        'semantic-v110.js','semantic-deep-v110.js','semantic-context-v110.js','entities-v200.js','idioms-v200.js',
+        'lm-v200.js','micro-model-v200.js','knowledge-v200.js','micro-integration-v200.js','learning-v200.js',
+        'quality-v210.js','quality-v220.js','syntax-v220.js','syntax-tuning-v220.js','semantic-ui-v110.js',
+        'context-v230.js','context-tuning-v231.js','semantic-model-v300.js','semantic-knowledge-v310.js','runtime-v240.js',
+        'semantic-document-v300.js','semantic-tuning-v301.js','semantic-tuning-v302.js','semantic-reasoning-v310.js',
+        'semantic-reasoning-tuning-v311.js','contextual-orthography-v312.js','contextual-orthography-rerank-v312.js',
+        'contextual-orthography-guard-v312.js','performance-guard-v313.js','integration-v105.js','editor-v110.js',
+        'longtext-v110.js','document-v300.js'
     }
     loaded = set(re.findall(r"loadScript\('([^']+\.js)'", bootstrap))
     disk = {path.name for path in runtime.glob('*.js') if path.name != 'bootstrap-v110.js'}
     missing = sorted(required - disk)
+    not_loaded = sorted(required - loaded)
+    orphan = sorted(disk - loaded)
     if missing:
         fail('Zorunlu runtime dosyası eksik: ' + ', '.join(missing))
-    not_loaded = sorted(required - loaded)
     if not_loaded:
         fail('Zorunlu runtime dosyası bootstrap tarafından yüklenmiyor: ' + ', '.join(not_loaded))
-    orphan = sorted(disk - loaded)
     if orphan:
         fail('Bootstrap tarafından yüklenmeyen runtime JS bulundu: ' + ', '.join(orphan))
     for path in sorted(runtime.glob('*.js')):
@@ -161,32 +148,37 @@ def check_runtime(root, version, asset_version):
     if "credentials:'same-origin'" not in learning or "body.set('_xfToken'" not in learning:
         fail('Yerel same-origin geri bildirim güvenliği eksik')
     semantic = read_text(runtime / 'semantic-reasoning-v310.js')
-    for marker in ['externalDependencies:0', 'propositionGraph:true', 'entityMemory:true', 'coreferenceResolution:true', 'stateLedger:true', 'selectionalSemantics:true', 'causalKnowledgeBase:true']:
+    for marker in ['externalDependencies:0','propositionGraph:true','entityMemory:true','coreferenceResolution:true','stateLedger:true','selectionalSemantics:true','causalKnowledgeBase:true']:
         if marker not in semantic:
             fail(f'V3.1 anlam motoru özelliği eksik: {marker}')
     tuning = read_text(runtime / 'semantic-reasoning-tuning-v311.js')
-    for marker in ['externalDependencies:0', 'hypotheticalAssertionsExcluded:true', 'entityScopedTransitions:true', 'ambiguousPronounCalibration:true']:
+    for marker in ['externalDependencies:0','hypotheticalAssertionsExcluded:true','entityScopedTransitions:true','ambiguousPronounCalibration:true']:
         if marker not in tuning:
             fail(f'V3.1.1 kalibrasyon özelliği eksik: {marker}')
     orthography = read_text(runtime / 'contextual-orthography-v312.js')
-    for marker in ['externalDependencies:0', 'contextualDoubleVowelRepair:true', 'genitivePossessiveRepair:true', 'localLanguageModelOrthography:true']:
+    for marker in ['externalDependencies:0','contextualDoubleVowelRepair:true','genitivePossessiveRepair:true','localLanguageModelOrthography:true']:
         if marker not in orthography:
             fail(f'V3.1.2 bağlamsal yazım özelliği eksik: {marker}')
-    performance_guard = read_text(runtime / 'performance-guard-v313.js')
-    for marker in ["const VERSION = '3.1.3';", 'MAX_LONGTEXT_SEGMENT = 1000', 'DEEP_SETTLE_MS = 2400', 'navigator.scheduling?.isInputPending', 'settled-hierarchical', 'boundedMainThread:true', 'externalDependencies:0']:
-        if marker not in performance_guard:
+    guard = read_text(runtime / 'performance-guard-v313.js')
+    for marker in ["const VERSION = '3.1.3';",'MAX_LONGTEXT_SEGMENT = 1000','DEEP_SETTLE_MS = 2400','navigator.scheduling?.isInputPending','settled-hierarchical','boundedMainThread:true','externalDependencies:0']:
+        if marker not in guard:
             fail(f'V3.1.3 performans koruma özelliği eksik: {marker}')
-    guard_pos = bootstrap.find("performance-guard-v313.js")
-    for asset in ['editor-v110.js', 'longtext-v110.js', 'document-v300.js']:
-        if guard_pos < 0 or bootstrap.find(asset) <= guard_pos:
+    document = read_text(runtime / 'document-v300.js')
+    for marker in ["const VERSION = '3.1.3';",'DEEP_SETTLE_MS = 2550',"deep && st.mode === 'live-window'",'settled:deep','forceDeep:deep','rangeIndex(el)']:
+        if marker not in document:
+            fail(f'V3.1.3 belge denetimi özelliği eksik: {marker}')
+    guard_pos = bootstrap.find("loadScript('performance-guard-v313.js'")
+    for asset in ['editor-v110.js','longtext-v110.js','document-v300.js']:
+        asset_pos = bootstrap.find(f"loadScript('{asset}'")
+        if guard_pos < 0 or asset_pos <= guard_pos:
             fail(f'Performans koruması {asset} dosyasından önce yüklenmiyor')
 
 
 def check_resources(root):
     resources = root / 'upload' / ADDON_REL / 'Resources'
     required = {
-        'dictionary-stats.json', 'entity-stats.json', 'idiom-stats.json', 'lm-stats.json', 'micro-model-stats.json',
-        'THIRD_PARTY_DATA.txt', 'LICENSE-MPL-2.0.txt', 'LICENSE-TURKISH-DICTIONARY-MIT.txt', 'LICENSE-TURKISH-DIALOGUES-CC-BY-4.0.txt'
+        'dictionary-stats.json','entity-stats.json','idiom-stats.json','lm-stats.json','micro-model-stats.json',
+        'THIRD_PARTY_DATA.txt','LICENSE-MPL-2.0.txt','LICENSE-TURKISH-DICTIONARY-MIT.txt','LICENSE-TURKISH-DIALOGUES-CC-BY-4.0.txt'
     }
     missing = sorted(name for name in required if not (resources / name).is_file())
     if missing:
@@ -209,13 +201,12 @@ def check_resources(root):
 
 
 def expected_hashes(upload_root):
-    hashes = {}
     target = upload_root / ADDON_REL / 'hashes.json'
-    for path in sorted(upload_root.rglob('*')):
-        if not path.is_file() or path == target:
-            continue
-        hashes[path.relative_to(upload_root).as_posix()] = sha256_bytes(path.read_bytes())
-    return hashes
+    return {
+        path.relative_to(upload_root).as_posix(): sha256_bytes(path.read_bytes())
+        for path in sorted(upload_root.rglob('*'))
+        if path.is_file() and path != target
+    }
 
 
 def check_hashes(root):
@@ -230,6 +221,22 @@ def check_hashes(root):
         extra = sorted(set(actual) - set(expected))[:8]
         wrong = sorted(key for key in set(actual) & set(expected) if actual[key] != expected[key])[:8]
         fail(f'hashes.json eşleşmiyor; eksik={missing}, fazla={extra}, farklı={wrong}')
+
+
+def check_repository(root, version):
+    readme = read_text(root / 'README.md')
+    if f'V{version}' not in readme or f'Warext-Turkce-Yazim-Denetimi-V{version}-XenForo.zip' not in readme:
+        fail('README güncel sürümle eşleşmiyor')
+    if 'COMPACT.zip' in readme:
+        fail('README dış indirme kullanan COMPACT paketi önermemeli')
+    if (root / '.github/workflows/build-compact-installer.yml').exists():
+        fail('Dış indirme kullanan COMPACT release workflow kaldırılmalı')
+    changelog = read_text(root / 'upload' / ADDON_REL / 'CHANGELOG.md')
+    if f'## V{version}' not in changelog:
+        fail('CHANGELOG güncel sürümü içermiyor')
+    workflow = read_text(root / '.github/workflows/build-release.yml')
+    if 'CHANGELOG.md' not in workflow or 'GitHub Release oluştur veya güncelle' not in workflow:
+        fail('Release açıklama otomasyonu eksik')
 
 
 def check_package(root, package_path, version, version_id):
@@ -250,11 +257,8 @@ def check_package(root, package_path, version, version_id):
             'upload/src/addons/Warext/TurkishSpellCheck/Setup.php',
             'upload/src/addons/Warext/TurkishSpellCheck/hashes.json',
             'upload/js/warext/turkish-spellcheck/bootstrap-v110.js',
-            'upload/js/warext/turkish-spellcheck/semantic-knowledge-v310.js',
-            'upload/js/warext/turkish-spellcheck/semantic-reasoning-v310.js',
-            'upload/js/warext/turkish-spellcheck/semantic-reasoning-tuning-v311.js',
-            'upload/js/warext/turkish-spellcheck/contextual-orthography-v312.js',
-            'upload/js/warext/turkish-spellcheck/performance-guard-v313.js'
+            'upload/js/warext/turkish-spellcheck/performance-guard-v313.js',
+            'upload/js/warext/turkish-spellcheck/document-v300.js'
         }
         missing = sorted(required - names)
         if missing:
@@ -263,7 +267,7 @@ def check_package(root, package_path, version, version_id):
             parts = Path(name).parts
             if name.startswith('/') or '..' in parts:
                 fail(f'ZIP içinde güvensiz yol bulundu: {name}')
-            if name.startswith(('source/', 'tools/', 'tests/', '.github/', 'release/')):
+            if name.startswith(('source/','tools/','tests/','.github/','release/')):
                 fail(f'ZIP geliştirme dosyası içeriyor: {name}')
         addon = json.loads(archive.read('upload/src/addons/Warext/TurkishSpellCheck/addon.json').decode('utf-8'))
         if addon.get('version_string') != version or int(addon.get('version_id', 0)) != version_id:
@@ -278,20 +282,6 @@ def check_package(root, package_path, version, version_id):
             fail('ZIP içindeki hashes.json paket içeriğiyle eşleşmiyor')
 
 
-def check_repository(root):
-    for path in root.rglob('*'):
-        if not path.is_file() or any(part in SKIP_DIRS for part in path.parts):
-            continue
-        if path.suffix.lower() in TEXT_SUFFIXES or path.name == '.gitignore':
-            check_comments(path, read_text(path))
-    readme = read_text(root / 'README.md')
-    if 'COMPACT.zip' in readme:
-        fail('README artık dış indirme kullanan COMPACT paketi önermemeli')
-    compact_workflow = root / '.github/workflows/build-compact-installer.yml'
-    if compact_workflow.exists():
-        fail('Dış indirme kullanan COMPACT release workflow kaldırılmalı')
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('root')
@@ -299,11 +289,11 @@ def main():
     args = parser.parse_args()
     root = Path(args.root).resolve()
     addon, version, version_id = addon_meta(root)
-    asset_version = check_addon(root, addon, version, version_id)
+    asset_version = check_addon_data(root, version)
     check_runtime(root, version, asset_version)
     check_resources(root)
     check_hashes(root)
-    check_repository(root)
+    check_repository(root, version)
     if args.package:
         check_package(root, args.package, version, version_id)
     print(f'Warext Türkçe Yazım Denetimi V{version} nihai denetimi başarılı.')

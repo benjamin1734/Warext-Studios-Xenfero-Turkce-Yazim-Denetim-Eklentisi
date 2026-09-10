@@ -42,10 +42,10 @@ assert.ok(documentSource.includes('forceDeep:deep'));
 assert.ok(documentSource.includes('rangeIndex(el)'));
 assert.ok(!/fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|https?:\/\//u.test(documentSource));
 
-const guardPos = bootstrap.indexOf('performance-guard-v313.js');
-const editorPos = bootstrap.indexOf('editor-v110.js');
-const longPos = bootstrap.indexOf('longtext-v110.js');
-const documentPos = bootstrap.indexOf('document-v300.js');
+const guardPos = bootstrap.indexOf("loadScript('performance-guard-v313.js'");
+const editorPos = bootstrap.indexOf("loadScript('editor-v110.js'");
+const longPos = bootstrap.indexOf("loadScript('longtext-v110.js'");
+const documentPos = bootstrap.indexOf("loadScript('document-v300.js'");
 assert.ok(guardPos > -1 && editorPos > guardPos && longPos > guardPos && documentPos > guardPos);
 assert.ok(bootstrap.includes("const VERSION = '1.0.6';"));
 assert.ok(bootstrap.includes("const ASSET_VERSION = '3130';"));
