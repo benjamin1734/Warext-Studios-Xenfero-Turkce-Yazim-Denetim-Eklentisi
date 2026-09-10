@@ -52,6 +52,7 @@ node "$ROOT/tests/v310-semantic-reasoning-regression.js"
 node "$ROOT/tests/v311-semantic-benchmark.js"
 node "$ROOT/tests/v311-document-performance-contract.js"
 node "$ROOT/tests/v312-contextual-orthography-regression.js"
+node "$ROOT/tests/v313-performance-guard-regression.js"
 
 python3 "$ROOT/tools/final_audit.py" "$ROOT"
 

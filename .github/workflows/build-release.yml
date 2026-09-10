@@ -77,15 +77,41 @@ jobs:
           TAG="V${VERSION}"
           git fetch origin main
           TARGET="$(git rev-parse origin/main)"
-          cat > /tmp/warext-release-notes.md <<EOF
-          Warext Studios | Türkçe Yazım Denetimi ${TAG}
+          python3 - <<'PY' > /tmp/warext-release-notes.md
+          import json
+          from pathlib import Path
 
-          XenForo 2.3+ için doğrudan kurulabilir doğrulanmış paket.
+          addon = json.loads(Path('upload/src/addons/Warext/TurkishSpellCheck/addon.json').read_text(encoding='utf-8'))
+          version = addon['version_string']
+          package = f"Warext-Turkce-Yazim-Denetimi-V{version}-XenForo.zip"
+          changelog = Path('upload/src/addons/Warext/TurkishSpellCheck/CHANGELOG.md').read_text(encoding='utf-8').splitlines()
+          heading = f"## V{version}"
+          notes = []
+          active = False
+          for line in changelog:
+              if line.strip() == heading:
+                  active = True
+                  continue
+              if active and line.startswith('## '):
+                  break
+              if active and line.strip():
+                  notes.append(line.rstrip())
 
-          Bu sürümde bağlama duyarlı yazım denetimi, morfolojik aday doğrulaması, yerel dil modeli sıralaması ve V3.1.2 regresyon kontrolleri bulunur.
-
-          Kurulum: Release altındaki **${PACKAGE}** dosyasını indirin ve XenForo ACP → Add-ons → Install/upgrade from archive alanından yükleyin.
-          EOF
+          print(f"# Warext Studios | Türkçe Yazım Denetimi V{version}")
+          print()
+          print("XenForo 2.3+ için tamamen yerel çalışan doğrudan kurulabilir kararlı paket.")
+          print()
+          if notes:
+              print("## Bu sürümde")
+              print()
+              print('\n'.join(notes))
+              print()
+          print("## Kurulum")
+          print()
+          print(f"Release altındaki **{package}** dosyasını indirin ve XenForo ACP → Add-ons → Install/upgrade from archive alanından yükleyin.")
+          print()
+          print("Çalışma zamanında harici API, bulut modeli veya uzak NLP servisi kullanılmaz.")
+          PY
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "$PACKAGE" --clobber
             gh release edit "$TAG" --title "$TAG" --notes-file /tmp/warext-release-notes.md

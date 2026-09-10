@@ -1,9 +1,17 @@
 name: Hata bildirimi
-description: Eklenti davranışındaki bir hatayı bildirin
+description: Yazım, dilbilgisi, anlam veya performans sorununu bildirin
 title: "[Hata] "
 labels:
   - bug
 body:
+  - type: input
+    id: addon
+    attributes:
+      label: Eklenti sürümü
+      description: GitHub Releases veya XenForo Add-ons ekranında görünen sürümü yazın
+      placeholder: V1.0.6
+    validations:
+      required: true
   - type: input
     id: xenforo
     attributes:
@@ -21,27 +29,35 @@ body:
   - type: input
     id: browser
     attributes:
-      label: Tarayıcı
-      placeholder: Chrome, Firefox, Edge
+      label: Tarayıcı ve cihaz
+      placeholder: Chrome 142 / Windows 11 veya Safari / iPhone
     validations:
       required: true
   - type: textarea
     id: text
     attributes:
       label: Yazılan metin
-      description: Hatanın oluştuğu örnek metni aynen yazın
+      description: Sorunun oluştuğu örnek metni mümkünse aynen yazın. Gizli/özel içerik paylaşmayın.
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: Beklenen sonuç
-      description: Hangi önerinin veya davranışın çıkmasını beklediğinizi yazın
+      description: Hangi önerinin, anlam uyarısının veya performans davranışının çıkmasını beklediğinizi yazın
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
       label: Gerçekleşen sonuç
+      description: Yanlış öneri, kaçırılan hata, takılma veya gecikmeyi açıklayın
     validations:
       required: true
+  - type: textarea
+    id: performance
+    attributes:
+      label: Uzun metin / performans bilgisi
+      description: Sorun takılma ise yaklaşık karakter sayısını, kaç saniye sürdüğünü ve yazarken mi yoksa yazmayı bıraktıktan sonra mı oluştuğunu belirtin
+    validations:
+      required: false

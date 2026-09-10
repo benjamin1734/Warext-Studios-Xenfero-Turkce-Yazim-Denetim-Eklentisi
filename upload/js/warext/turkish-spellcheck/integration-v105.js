@@ -5,7 +5,7 @@
   window.__warextWritingIntegrationV105 = true;
 
   const BRIDGE_VERSION = '1.1.0';
-  const ADDON_VERSION = '1.0.5';
+  const ADDON_VERSION = '1.0.6';
   const STORAGE_KEY = 'warextWritingIntegration:v105';
   const MAX_EVENTS = 40;
   let beforeSnapshot = null;

@@ -6,9 +6,6 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-VERSION_STRING = '1.0.5'
-VERSION_ID = 5300075
-PACKAGE_NAME = 'Warext-Turkce-Yazim-Denetimi-V1.0.5-XenForo.zip'
 ADDON_REL = Path('src/addons/Warext/TurkishSpellCheck')
 RUNTIME_REL = Path('js/warext/turkish-spellcheck')
 TEXT_SUFFIXES = {'.php', '.js', '.py', '.sh', '.json', '.xml', '.yml', '.yaml', '.md', '.txt', '.gitignore'}
@@ -47,8 +44,15 @@ def sha256_bytes(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def is_text(path):
-    return path.suffix.lower() in TEXT_SUFFIXES or path.name == '.gitignore'
+def addon_meta(root):
+    addon = parse_json(root / 'upload' / ADDON_REL / 'addon.json')
+    version = str(addon.get('version_string', '')).strip()
+    version_id = int(addon.get('version_id', 0))
+    if not re.fullmatch(r'\d+\.\d+\.\d+', version):
+        fail('addon.json version_string geçersiz')
+    if version_id <= 0:
+        fail('addon.json version_id geçersiz')
+    return addon, version, version_id
 
 
 def check_comments(path, text):
@@ -60,11 +64,8 @@ def check_comments(path, text):
             fail(f'Python yorum satırı bulundu: {path}:{number}')
 
 
-def check_addon(root):
+def check_addon(root, addon, version, version_id):
     addon_root = root / 'upload' / ADDON_REL
-    addon = parse_json(addon_root / 'addon.json')
-    if addon.get('version_string') != VERSION_STRING or int(addon.get('version_id', 0)) != VERSION_ID:
-        fail('addon.json sürümü geçersiz')
     if addon.get('title') != 'Warext Studios | Türkçe Yazım Denetimi':
         fail('Eklenti başlığı geçersiz')
     if int(addon.get('require', {}).get('XF', [0])[0]) < 2030070:
@@ -87,9 +88,8 @@ def check_addon(root):
         if addon_id != 'Warext\\TurkishSpellCheck' or not name:
             fail(f'Beklenmeyen controller rotası: {controller}')
         area = 'Admin' if route_type == 'admin' else 'Pub'
-        controller_path = addon_root / area / 'Controller' / f'{name}.php'
-        if not controller_path.is_file():
-            fail(f'Route controller dosyası eksik: {controller_path}')
+        if not (addon_root / area / 'Controller' / f'{name}.php').is_file():
+            fail(f'Route controller dosyası eksik: {name}')
     options_root = parse_xml(data_root / 'options.xml').getroot()
     phrases_root = parse_xml(data_root / 'phrases.xml').getroot()
     option_ids = {node.attrib.get('option_id', '') for node in options_root.findall('option')}
@@ -104,20 +104,30 @@ def check_addon(root):
     missing = sorted(referenced - option_ids)
     if missing:
         fail('Template içinde tanımsız option bulundu: ' + ', '.join(missing))
-    if template.count('?wtsc=3121') < 2:
-        fail('V3.1.2 önbellek kırıcı template bağlantısı eksik')
+    bootstrap = read_text(root / 'upload' / RUNTIME_REL / 'bootstrap-v110.js')
+    asset_match = re.search(r"const ASSET_VERSION = '([^']+)';", bootstrap)
+    if not asset_match:
+        fail('Bootstrap önbellek sürüm anahtarı eksik')
+    asset_version = asset_match.group(1)
+    if template.count(f'?wtsc={asset_version}') < 2:
+        fail('Template önbellek kırıcı bootstrap ile eşleşmiyor')
     if "link('warext-spell-feedback')" not in template:
         fail('Yerel geri bildirim route bağlantısı eksik')
+    if f"const VERSION = '{version}';" not in bootstrap:
+        fail('Bootstrap eklenti sürümü addon.json ile eşleşmiyor')
+    integration = read_text(root / 'upload' / RUNTIME_REL / 'integration-v105.js')
+    if f"const ADDON_VERSION = '{version}';" not in integration:
+        fail('Entegrasyon köprü sürümü addon.json ile eşleşmiyor')
+    return asset_version
 
 
-def check_runtime(root):
+def check_runtime(root, version, asset_version):
     runtime = root / 'upload' / RUNTIME_REL
-    bootstrap_path = runtime / 'bootstrap-v110.js'
-    bootstrap = read_text(bootstrap_path)
-    if "const VERSION = '1.0.5';" not in bootstrap or "const ASSET_VERSION = '3121';" not in bootstrap:
+    bootstrap = read_text(runtime / 'bootstrap-v110.js')
+    if f"const VERSION = '{version}';" not in bootstrap or f"const ASSET_VERSION = '{asset_version}';" not in bootstrap:
         fail('Bootstrap sürümü geçersiz')
-    if "dataset.wtscSemantic = 'v312'" not in bootstrap:
-        fail('V3.1.2 çalışma zamanı işareti eksik')
+    if "dataset.wtscSemantic = 'v313'" not in bootstrap:
+        fail('V3.1.3 çalışma zamanı işareti eksik')
     required = {
         'text-core-v110.js', 'lexicon-v200.js', 'dictionary-v110.js', 'corrections-v110.js', 'language-v110.js',
         'semantic-v110.js', 'semantic-deep-v110.js', 'semantic-context-v110.js', 'entities-v200.js', 'idioms-v200.js',
@@ -125,7 +135,8 @@ def check_runtime(root):
         'quality-v210.js', 'quality-v220.js', 'syntax-v220.js', 'syntax-tuning-v220.js', 'semantic-ui-v110.js',
         'context-v230.js', 'context-tuning-v231.js', 'semantic-model-v300.js', 'semantic-knowledge-v310.js', 'runtime-v240.js',
         'semantic-document-v300.js', 'semantic-tuning-v301.js', 'semantic-tuning-v302.js', 'semantic-reasoning-v310.js',
-        'semantic-reasoning-tuning-v311.js', 'contextual-orthography-v312.js', 'integration-v105.js', 'editor-v110.js',
+        'semantic-reasoning-tuning-v311.js', 'contextual-orthography-v312.js', 'contextual-orthography-rerank-v312.js',
+        'contextual-orthography-guard-v312.js', 'performance-guard-v313.js', 'integration-v105.js', 'editor-v110.js',
         'longtext-v110.js', 'document-v300.js'
     }
     loaded = set(re.findall(r"loadScript\('([^']+\.js)'", bootstrap))
@@ -161,6 +172,14 @@ def check_runtime(root):
     for marker in ['externalDependencies:0', 'contextualDoubleVowelRepair:true', 'genitivePossessiveRepair:true', 'localLanguageModelOrthography:true']:
         if marker not in orthography:
             fail(f'V3.1.2 bağlamsal yazım özelliği eksik: {marker}')
+    performance_guard = read_text(runtime / 'performance-guard-v313.js')
+    for marker in ["const VERSION = '3.1.3';", 'MAX_LONGTEXT_SEGMENT = 1000', 'DEEP_SETTLE_MS = 2400', 'navigator.scheduling?.isInputPending', 'settled-hierarchical', 'boundedMainThread:true', 'externalDependencies:0']:
+        if marker not in performance_guard:
+            fail(f'V3.1.3 performans koruma özelliği eksik: {marker}')
+    guard_pos = bootstrap.find("performance-guard-v313.js")
+    for asset in ['editor-v110.js', 'longtext-v110.js', 'document-v300.js']:
+        if guard_pos < 0 or bootstrap.find(asset) <= guard_pos:
+            fail(f'Performans koruması {asset} dosyasından önce yüklenmiyor')
 
 
 def check_resources(root):
@@ -213,11 +232,12 @@ def check_hashes(root):
         fail(f'hashes.json eşleşmiyor; eksik={missing}, fazla={extra}, farklı={wrong}')
 
 
-def check_package(root, package_path):
+def check_package(root, package_path, version, version_id):
     package = Path(package_path)
     if not package.is_absolute():
         package = root / package
-    if package.name != PACKAGE_NAME or not package.is_file():
+    expected_name = f'Warext-Turkce-Yazim-Denetimi-V{version}-XenForo.zip'
+    if package.name != expected_name or not package.is_file():
         fail('Nihai XenForo ZIP paketi bulunamadı')
     with zipfile.ZipFile(package) as archive:
         bad = archive.testzip()
@@ -233,7 +253,8 @@ def check_package(root, package_path):
             'upload/js/warext/turkish-spellcheck/semantic-knowledge-v310.js',
             'upload/js/warext/turkish-spellcheck/semantic-reasoning-v310.js',
             'upload/js/warext/turkish-spellcheck/semantic-reasoning-tuning-v311.js',
-            'upload/js/warext/turkish-spellcheck/contextual-orthography-v312.js'
+            'upload/js/warext/turkish-spellcheck/contextual-orthography-v312.js',
+            'upload/js/warext/turkish-spellcheck/performance-guard-v313.js'
         }
         missing = sorted(required - names)
         if missing:
@@ -245,7 +266,7 @@ def check_package(root, package_path):
             if name.startswith(('source/', 'tools/', 'tests/', '.github/', 'release/')):
                 fail(f'ZIP geliştirme dosyası içeriyor: {name}')
         addon = json.loads(archive.read('upload/src/addons/Warext/TurkishSpellCheck/addon.json').decode('utf-8'))
-        if addon.get('version_string') != VERSION_STRING or int(addon.get('version_id', 0)) != VERSION_ID:
+        if addon.get('version_string') != version or int(addon.get('version_id', 0)) != version_id:
             fail('ZIP içindeki addon.json sürümü geçersiz')
         hashes = json.loads(archive.read('upload/src/addons/Warext/TurkishSpellCheck/hashes.json').decode('utf-8'))
         expected = {}
@@ -257,33 +278,35 @@ def check_package(root, package_path):
             fail('ZIP içindeki hashes.json paket içeriğiyle eşleşmiyor')
 
 
+def check_repository(root):
+    for path in root.rglob('*'):
+        if not path.is_file() or any(part in SKIP_DIRS for part in path.parts):
+            continue
+        if path.suffix.lower() in TEXT_SUFFIXES or path.name == '.gitignore':
+            check_comments(path, read_text(path))
+    readme = read_text(root / 'README.md')
+    if 'COMPACT.zip' in readme:
+        fail('README artık dış indirme kullanan COMPACT paketi önermemeli')
+    compact_workflow = root / '.github/workflows/build-compact-installer.yml'
+    if compact_workflow.exists():
+        fail('Dış indirme kullanan COMPACT release workflow kaldırılmalı')
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('root', nargs='?', default='.')
-    parser.add_argument('--package', default='')
+    parser.add_argument('root')
+    parser.add_argument('--package')
     args = parser.parse_args()
     root = Path(args.root).resolve()
-    scanned = 0
-    for path in sorted(root.rglob('*')):
-        if not path.is_file() or any(part in SKIP_DIRS for part in path.parts) or path.suffix.lower() == '.zip':
-            continue
-        relative = path.relative_to(root)
-        if not is_text(relative):
-            continue
-        text = read_text(path)
-        scanned += 1
-        check_comments(relative, text)
-        if path.suffix.lower() == '.json':
-            parse_json(path)
-        elif path.suffix.lower() == '.xml':
-            parse_xml(path)
-    check_addon(root)
-    check_runtime(root)
+    addon, version, version_id = addon_meta(root)
+    asset_version = check_addon(root, addon, version, version_id)
+    check_runtime(root, version, asset_version)
     check_resources(root)
     check_hashes(root)
+    check_repository(root)
     if args.package:
-        check_package(root, args.package)
-    print(json.dumps({'release':VERSION_STRING,'filesScanned':scanned,'runtimeExternalDependencies':0,'semanticEngine':'v312','status':'ok'}, ensure_ascii=False, separators=(',', ':')))
+        check_package(root, args.package, version, version_id)
+    print(f'Warext Türkçe Yazım Denetimi V{version} nihai denetimi başarılı.')
 
 
 if __name__ == '__main__':

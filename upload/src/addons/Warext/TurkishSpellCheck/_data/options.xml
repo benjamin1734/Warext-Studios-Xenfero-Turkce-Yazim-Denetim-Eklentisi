@@ -16,9 +16,9 @@ max=3</edit_format_params><sub_options></sub_options><relation group_id="warextS
   <option option_id="warextSpellLongText" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="75"/></option>
   <option option_id="warextSpellLongTextThreshold" edit_format="spinbox" data_type="integer" advanced="0"><default_value>700</default_value><edit_format_params>min=250
 max=50000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="76"/></option>
-  <option option_id="warextSpellLongTextMaxIssues" edit_format="spinbox" data_type="integer" advanced="0"><default_value>220</default_value><edit_format_params>min=20
+  <option option_id="warextSpellLongTextMaxIssues" edit_format="spinbox" data_type="integer" advanced="0"><default_value>160</default_value><edit_format_params>min=20
 max=800</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="77"/></option>
-  <option option_id="warextSpellLongTextSegmentSize" edit_format="spinbox" data_type="integer" advanced="0"><default_value>1800</default_value><edit_format_params>min=600
+  <option option_id="warextSpellLongTextSegmentSize" edit_format="spinbox" data_type="integer" advanced="0"><default_value>1000</default_value><edit_format_params>min=600
 max=5000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="78"/></option>
   <option option_id="warextSpellCustomWords" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="90"/></option>
   <option option_id="warextSpellCustomProperNames" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="100"/></option>

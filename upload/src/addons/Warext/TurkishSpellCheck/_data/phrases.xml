@@ -2,8 +2,8 @@
 <phrases>
   <phrase title="admin_navigation.warext_spell_learning" version_id="5300070" version_string="1.0.0"><![CDATA[Warext Yazım Öğrenimi]]></phrase>
   <phrase title="admin_permission.warextSpellLearning" version_id="5300070" version_string="1.0.0"><![CDATA[Warext yazım öğrenimini yönet]]></phrase>
-  <phrase title="option_group_warextSpell" version_id="5300070" version_string="1.0.0"><![CDATA[Warext Türkçe Yazım Denetimi]]></phrase>
-  <phrase title="option_group_warextSpell_description" version_id="5300070" version_string="1.0.0"><![CDATA[Tamamen yerel Türkçe yazım, dilbilgisi, morfoloji, anlam, yer adı, deyim, yerel dil modeli, uzun metin, öğrenme ve sözlük ayarları.]]></phrase>
+  <phrase title="option_group_warextSpell" version_id="5300076" version_string="1.0.6"><![CDATA[Warext Türkçe Yazım Denetimi]]></phrase>
+  <phrase title="option_group_warextSpell_description" version_id="5300076" version_string="1.0.6"><![CDATA[Tamamen yerel Türkçe yazım, dilbilgisi, morfoloji, bağlamsal yazım, belge düzeyi anlam, yerel dil modeli, performans kontrollü uzun metin, öğrenme ve sözlük ayarları.]]></phrase>
   <phrase title="option_warextSpellEnabled" version_id="5300070" version_string="1.0.0"><![CDATA[Yazım denetimini etkinleştir]]></phrase>
   <phrase title="option_warextSpellEnabled_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Mesaj editörü ve konu başlığı alanlarında yerel Türkçe denetimini çalıştırır.]]></phrase>
   <phrase title="option_warextSpellGrammar" version_id="5300070" version_string="1.0.0"><![CDATA[Dilbilgisi ve bağlam denetimi]]></phrase>
@@ -18,22 +18,22 @@
   <phrase title="option_warextSpellInformal_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Gelicem gibi günlük biçimler için standart Türkçe karşılıklarını önerir.]]></phrase>
   <phrase title="option_warextSpellDeepContext" version_id="5300070" version_string="1.0.0"><![CDATA[Komşu cümle bağlamını kullan]]></phrase>
   <phrase title="option_warextSpellDeepContext_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Önceki ve sonraki cümleyi zaman, gönderim, söylem ve anlam tutarlılığı denetimine dahil eder.]]></phrase>
-  <phrase title="option_warextSpellSemantic" version_id="5300070" version_string="1.0.0"><![CDATA[Yerel derin anlam denetimi]]></phrase>
-  <phrase title="option_warextSpellSemantic_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Sözcük anlamı ayrıştırma, semantik roller, özne-nesne uyumu, fiil istemi, bağımlılık çözümleme, deyim, mantıksal çelişki ve cümleler arası tutarlılığı harici model kullanmadan denetler.]]></phrase>
+  <phrase title="option_warextSpellSemantic" version_id="5300076" version_string="1.0.6"><![CDATA[Yerel derin anlam denetimi]]></phrase>
+  <phrase title="option_warextSpellSemantic_explain" version_id="5300076" version_string="1.0.6"><![CDATA[Sözcük anlamı, semantik roller, özne-nesne uyumu, fiil istemi, önerme grafiği, gönderim, mantıksal çelişki, neden-sonuç ve paragraf bütünlüğünü harici model kullanmadan denetler. Uzun metinlerde analiz V3.1.3 performans korumasıyla kademeli çalışır.]]></phrase>
   <phrase title="option_warextSpellSemanticSensitivity" version_id="5300070" version_string="1.0.0"><![CDATA[Anlam denetimi hassasiyeti]]></phrase>
   <phrase title="option_warextSpellSemanticSensitivity_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Anlam uyarılarının gösterilmesi için gereken minimum güven yüzdesidir. Varsayılan 88, daha yüksek değer daha az fakat daha kesin uyarı üretir.]]></phrase>
   <phrase title="option_warextSpellFeedback" version_id="5300070" version_string="1.0.0"><![CDATA[Kullanıcı geri bildirimini etkinleştir]]></phrase>
   <phrase title="option_warextSpellFeedback_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Kullanıcıların yanlış pozitifleri ve kabul ettikleri önerileri yalnızca bu XenForo kurulumundaki yerel geri bildirim uç noktasına göndermesine izin verir. Harici servise veri gönderilmez.]]></phrase>
   <phrase title="option_warextSpellMaxSuggestions" version_id="5300070" version_string="1.0.0"><![CDATA[Maksimum öneri sayısı]]></phrase>
   <phrase title="option_warextSpellMaxSuggestions_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Öneri alanında aynı anda gösterilecek düzeltme sayısı.]]></phrase>
-  <phrase title="option_warextSpellLongText" version_id="5300070" version_string="1.0.0"><![CDATA[Uzun metin taramasını etkinleştir]]></phrase>
-  <phrase title="option_warextSpellLongText_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Uzun mesajları parçalara ayırarak arka planda tarar, değişmeyen bölümleri önbellekten kullanır ve bağlamı komşu cümlelerle birlikte işler.]]></phrase>
+  <phrase title="option_warextSpellLongText" version_id="5300076" version_string="1.0.6"><![CDATA[Uzun metin taramasını etkinleştir]]></phrase>
+  <phrase title="option_warextSpellLongText_explain" version_id="5300076" version_string="1.0.6"><![CDATA[Uzun mesajları küçük parçalara ayırır. Yazarken değişen bölgeyi hızlı tarar; kullanıcı yazmayı bıraktığında sınırlı hiyerarşik belge ve anlam analizi yapar. Değişmeyen bölümler önbellekten kullanılır ve kullanıcı girdisi beklerken ağır analiz ertelenir.]]></phrase>
   <phrase title="option_warextSpellLongTextThreshold" version_id="5300070" version_string="1.0.0"><![CDATA[Uzun metin eşiği]]></phrase>
-  <phrase title="option_warextSpellLongTextThreshold_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Tam metin arka plan taramasının başlayacağı minimum karakter sayısı. Varsayılan 700.]]></phrase>
-  <phrase title="option_warextSpellLongTextMaxIssues" version_id="5300070" version_string="1.0.0"><![CDATA[Uzun metinde maksimum tespit]]></phrase>
-  <phrase title="option_warextSpellLongTextMaxIssues_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Tek uzun mesaj taramasında tutulacak en fazla tespit sayısı. Varsayılan 220.]]></phrase>
-  <phrase title="option_warextSpellLongTextSegmentSize" version_id="5300070" version_string="1.0.0"><![CDATA[Uzun metin parça boyutu]]></phrase>
-  <phrase title="option_warextSpellLongTextSegmentSize_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Çok uzun cümle ve paragrafların arka planda işleneceği yaklaşık karakter boyutudur. Varsayılan 1800.]]></phrase>
+  <phrase title="option_warextSpellLongTextThreshold_explain" version_id="5300076" version_string="1.0.6"><![CDATA[Parçalı uzun metin taramasının başlayacağı minimum karakter sayısı. Varsayılan 700.]]></phrase>
+  <phrase title="option_warextSpellLongTextMaxIssues" version_id="5300076" version_string="1.0.6"><![CDATA[Uzun metinde maksimum tespit]]></phrase>
+  <phrase title="option_warextSpellLongTextMaxIssues_explain" version_id="5300076" version_string="1.0.6"><![CDATA[Tek uzun mesaj taramasında bellekte tutulacak en fazla tespit sayısı. Varsayılan 160.]]></phrase>
+  <phrase title="option_warextSpellLongTextSegmentSize" version_id="5300076" version_string="1.0.6"><![CDATA[Uzun metin parça boyutu]]></phrase>
+  <phrase title="option_warextSpellLongTextSegmentSize_explain" version_id="5300076" version_string="1.0.6"><![CDATA[Çok uzun cümle ve paragrafların arka planda işleneceği yaklaşık karakter boyutudur. Varsayılan 1000; V3.1.3 çalışma zamanı performans güvenliği daha büyük değerleri de en fazla 1000 karakterlik analiz parçalarına böler.]]></phrase>
   <phrase title="option_warextSpellCustomWords" version_id="5300070" version_string="1.0.0"><![CDATA[Forum özel sözlüğü]]></phrase>
   <phrase title="option_warextSpellCustomWords_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Doğru kabul edilecek özel kelimeleri satır satır veya virgülle ayırarak girin.]]></phrase>
   <phrase title="option_warextSpellCustomProperNames" version_id="5300070" version_string="1.0.0"><![CDATA[Forum özel isim listesi]]></phrase>
