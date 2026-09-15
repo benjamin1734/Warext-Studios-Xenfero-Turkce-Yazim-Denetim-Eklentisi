@@ -4,7 +4,7 @@
   if (window.__warextTurkishSpellCheckV400) return;
   window.__warextTurkishSpellCheckV400 = true;
 
-  const VERSION = '4.0.0';
+  const VERSION = '4.1.0';
   const data = document.getElementById('wtsc-config')?.dataset || {};
   const bool = (value, fallback = true) => value == null || value === '' ? fallback : !['0','false','off','no'].includes(String(value).toLowerCase());
   const num = (value, fallback, min, max) => Math.max(min, Math.min(max, Number.isFinite(Number(value)) ? Number(value) : fallback));
@@ -16,10 +16,12 @@
     punctuation: bool(data.punctuation, true),
     semantic: bool(data.semantic, true),
     maxSuggestions: num(data.maxSuggestions, 3, 1, 5),
-    localDebounce: num(data.localDebounce, 360, 100, 2000),
-    aiDebounce: num(data.aiDebounce, 1300, 500, 10000),
+    localDebounce: num(data.localDebounce, 360, 100, 2500),
+    aiDebounce: num(data.aiDebounce, 1500, 700, 12000),
     aiMinChars: num(data.aiMinChars, 12, 1, 1000),
     aiMaxChars: num(data.aiMaxChars, 8000, 500, 50000),
+    aiWindow: num(data.aiWindow, 2200, 600, 8000),
+    aiMinInterval: num(data.aiMinInterval, 2500, 1000, 15000),
     liveWindow: num(data.liveWindow, 1500, 400, 4000),
     aiEndpoint: String(data.aiEndpoint || ''),
     aiEnabled: bool(data.aiEnabled, true),
@@ -30,7 +32,8 @@
   const boundTextareas = new WeakSet();
   const aiCache = new Map();
   const CACHE_TTL = 180000;
-  const MAX_CACHE = 64;
+  const MAX_CACHE = 48;
+  let observerTimer = 0;
 
   document.documentElement.dataset.wtscEditor = VERSION;
   document.documentElement.dataset.wtscMode = cfg.mode;
@@ -55,6 +58,13 @@
 
   function editorCandidate(el) {
     return isTitle(el) || isTextarea(el) || isRich(el);
+  }
+
+  function visibleRichForTextarea(textarea) {
+    if (!(textarea instanceof HTMLTextAreaElement)) return null;
+    const box = textarea.closest('.js-editor')?.querySelector?.('.fr-box .fr-element[contenteditable="true"]')
+      || textarea.parentElement?.querySelector?.('.fr-box .fr-element[contenteditable="true"]');
+    return box instanceof HTMLElement && box.isConnected ? box : null;
   }
 
   function textAndCaret(el) {
@@ -86,21 +96,21 @@
     let start = Math.max(0, Math.min(text.length - wanted, caret - half));
     let end = Math.min(text.length, start + wanted);
 
-    const leftFloor = Math.max(0, start - 260);
+    const leftFloor = Math.max(0, start - 220);
     for (let i = start; i >= leftFloor; i--) {
       if (i === 0 || /[.!?…\n]/u.test(text[i - 1] || '')) {
         start = i;
         break;
       }
     }
-    const rightCeil = Math.min(text.length, end + 260);
+    const rightCeil = Math.min(text.length, end + 220);
     for (let i = end; i < rightCeil; i++) {
       if (i >= text.length || /[.!?…\n]/u.test(text[i] || '')) {
         end = Math.min(text.length, i + (i < text.length ? 1 : 0));
         break;
       }
     }
-    if (end - start > wanted + 520) end = start + wanted + 520;
+    if (end - start > wanted + 440) end = start + wanted + 440;
     return { start, end, text: text.slice(start, end) };
   }
 
@@ -136,9 +146,9 @@
     if (!localEnabled() || !localEngine) return [];
 
     const now = Date.now();
-    const huge = snapshot.text.length > 12000;
+    const huge = snapshot.text.length > 10000;
     const slow = st.slowUntil > now;
-    const wanted = huge || slow ? Math.min(760, cfg.liveWindow) : cfg.liveWindow;
+    const wanted = huge || slow ? Math.min(680, cfg.liveWindow) : cfg.liveWindow;
     const windowed = alignWindow(snapshot.text, snapshot.caret, wanted);
     const started = performance.now();
     let report = null;
@@ -161,7 +171,7 @@
 
     const elapsed = performance.now() - started;
     st.lastLocalMs = elapsed;
-    if (elapsed > 28) st.slowUntil = Date.now() + 5000;
+    if (elapsed > 24) st.slowUntil = Date.now() + 6000;
 
     const items = [];
     const seen = new Set();
@@ -187,7 +197,7 @@
       const token = wordAt(snapshot.text, snapshot.caret);
       if (token && token.end - token.start <= 64) {
         try {
-          const result = localEngine.check(token.word, { before: snapshot.text.slice(Math.max(0, token.start - 180), token.end), sentenceStart: false });
+          const result = localEngine.check(token.word, { before: snapshot.text.slice(Math.max(0, token.start - 160), token.end), sentenceStart: false });
           if (result?.correct === false && Array.isArray(result.suggestions) && result.suggestions[0]) {
             items.push({
               start: token.start,
@@ -285,7 +295,6 @@
       button.addEventListener('click', () => {
         replaceIssue(st.el, issue);
         hideBar(bar);
-        st.scheduleLocal(40);
       });
       bar.appendChild(button);
     }
@@ -419,8 +428,8 @@
     const original = String(raw.original || '');
 
     if (original && scope.text.slice(localStart, localEnd) !== original) {
-      const from = Math.max(0, localStart - 160);
-      const to = Math.min(scope.text.length, Math.max(localEnd + 160, localStart + original.length + 160));
+      const from = Math.max(0, localStart - 140);
+      const to = Math.min(scope.text.length, Math.max(localEnd + 140, localStart + original.length + 140));
       const nearby = scope.text.slice(from, to);
       const hit = nearby.indexOf(original);
       if (hit >= 0) {
@@ -453,13 +462,13 @@
   }
 
   function aiScope(snapshot) {
-    const wanted = Math.min(cfg.aiMaxChars, snapshot.text.length > 12000 ? 4200 : 6500);
+    const wanted = Math.min(cfg.aiMaxChars, cfg.aiWindow, snapshot.text.length > 10000 ? 1600 : cfg.aiWindow);
     return alignWindow(snapshot.text, snapshot.caret, wanted);
   }
 
   function localContextForScope(localIssues, scope) {
     return {
-      issues: (localIssues || []).filter(issue => issue.start < scope.end && issue.end > scope.start).slice(0, 16).map(issue => ({
+      issues: (localIssues || []).filter(issue => issue.start < scope.end && issue.end > scope.start).slice(0, 12).map(issue => ({
         start: Math.max(0, issue.start - scope.start),
         end: Math.max(0, issue.end - scope.start),
         original: issue.original || '',
@@ -470,12 +479,18 @@
     };
   }
 
+  function canReuseModeration(scope, snapshot, st) {
+    return st.kind === 'message' && scope.start === 0 && scope.end === snapshot.text.length && snapshot.text.length <= cfg.aiMaxChars;
+  }
+
   async function requestAi(st, snapshot, generation) {
-    if (!aiEnabled() || snapshot.text.trim().length < cfg.aiMinChars || generation !== st.generation) return;
+    if (!aiEnabled() || snapshot.text.trim().length < cfg.aiMinChars || generation !== st.generation || !st.userEdited) return;
     const scope = aiScope(snapshot);
     if (!scope.text.trim()) return;
-    const localContext = cfg.mode === 'hybrid' ? localContextForScope(st.localIssues, scope) : { issues: [] };
-    const cacheKey = `${cfg.mode}:${hashText(scope.text)}:${hashText(JSON.stringify(localContext))}`;
+    const localIssues = cfg.mode === 'hybrid' && st.localGeneration === generation ? st.localIssues : [];
+    const localContext = cfg.mode === 'hybrid' ? localContextForScope(localIssues, scope) : { issues: [] };
+    const includeModeration = canReuseModeration(scope, snapshot, st);
+    const cacheKey = `${cfg.mode}:${includeModeration ? 1 : 0}:${hashText(scope.text)}:${hashText(JSON.stringify(localContext))}`;
     const cached = cacheGet(cacheKey);
     if (cached) {
       const issues = (cached.writing?.issues || []).map(issue => normalizeAiIssue(issue, scope)).filter(Boolean);
@@ -487,16 +502,29 @@
       return;
     }
 
+    const sinceLast = Date.now() - st.lastAiStartedAt;
+    if (sinceLast < cfg.aiMinInterval) {
+      const remaining = cfg.aiMinInterval - sinceLast;
+      clearTimeout(st.aiTimer);
+      st.aiTimer = setTimeout(() => {
+        const latest = textAndCaret(st.el);
+        if (latest && generation === st.generation) requestAi(st, latest, generation);
+      }, remaining);
+      return;
+    }
+
     st.abort?.abort();
     const abort = new AbortController();
     st.abort = abort;
     st.aiPending = true;
+    st.lastAiStartedAt = Date.now();
     if (cfg.mode === 'ai' && !st.aiIssues.length) renderStatus(st, 'AI yazım denetimi inceliyor…');
 
     const body = new URLSearchParams();
     body.set('message', scope.text);
     body.set('mode', cfg.mode === 'hybrid' ? 'hybrid' : 'ai');
     body.set('local_context', JSON.stringify(localContext));
+    body.set('include_moderation', includeModeration ? '1' : '0');
     const token = window.XF?.config?.csrf || window.XF?.config?.csrfToken || document.querySelector('input[name="_xfToken"]')?.value || '';
     if (token) body.set('_xfToken', token);
 
@@ -544,22 +572,32 @@
     const issues = localAnalyze(snapshot, st);
     if (generation !== st.generation) return;
     st.localIssues = issues;
+    st.localGeneration = generation;
     if (cfg.mode === 'local') {
       if (issues.length) render(st, issues, 'local');
       else hideBar(st.bar);
     } else if (cfg.mode === 'hybrid') {
-      if (issues.length) render(st, issues, 'local');
-      else if (!st.aiPending) hideBar(st.bar);
+      if (issues.length && !st.aiPending) render(st, issues, 'local');
+      else if (!st.aiPending && !st.aiIssues.length) hideBar(st.bar);
     }
     document.documentElement.dataset.wtscLocalLatency = String(Math.round(st.lastLocalMs || 0));
   }
 
   function attach(el) {
-    if (!cfg.enabled || !editorCandidate(el) || states.has(el)) return states.get(el) || null;
+    if (!cfg.enabled || !editorCandidate(el)) return null;
+    if (el instanceof HTMLTextAreaElement) {
+      const rich = visibleRichForTextarea(el);
+      if (rich) return attach(rich);
+      if (el.offsetParent === null && el.matches('.js-editor,[data-xf-init~="editor"]')) return null;
+    }
+    if (states.has(el)) return states.get(el);
+
     const st = {
       el,
+      kind: isTitle(el) ? 'title' : 'message',
       bar: createBar(el),
       generation: 0,
+      localGeneration: -1,
       localTimer: 0,
       aiTimer: 0,
       idleId: 0,
@@ -570,10 +608,12 @@
       aiSource: '',
       lastSnapshot: null,
       lastLocalMs: 0,
-      slowUntil: 0
+      slowUntil: 0,
+      lastAiStartedAt: 0,
+      userEdited: false
     };
 
-    st.scheduleLocal = (delay = cfg.localDebounce) => {
+    st.schedule = ({ delay = cfg.localDebounce, allowAi = false, changed = false } = {}) => {
       st.generation++;
       const generation = st.generation;
       clearTimeout(st.localTimer);
@@ -582,6 +622,13 @@
       st.abort?.abort();
       st.abort = null;
       st.aiPending = false;
+
+      if (changed) {
+        st.userEdited = true;
+        st.localIssues = [];
+        st.aiIssues = [];
+        st.localGeneration = -1;
+      }
 
       if (localEnabled()) {
         st.localTimer = setTimeout(() => {
@@ -592,13 +639,11 @@
         }, st.slowUntil > Date.now() ? Math.max(delay, 650) : delay);
       }
 
-      if (aiEnabled()) {
+      if (allowAi && aiEnabled() && st.userEdited) {
         st.aiTimer = setTimeout(() => {
           const snapshot = textAndCaret(st.el);
           if (!snapshot || generation !== st.generation) return;
-          if (cfg.mode === 'hybrid' && localEnabled() && !st.localIssues.length) {
-            runLocal(st, generation);
-          }
+          if (cfg.mode === 'hybrid' && localEnabled() && st.localGeneration !== generation) runLocal(st, generation);
           requestAi(st, snapshot, generation);
         }, cfg.aiDebounce);
       }
@@ -606,12 +651,12 @@
 
     states.set(el, st);
     el.dataset.wtscBound = '4';
-    el.addEventListener('input', () => st.scheduleLocal(cfg.localDebounce), { passive: true });
-    el.addEventListener('paste', () => st.scheduleLocal(Math.max(160, cfg.localDebounce)), { passive: true });
-    el.addEventListener('cut', () => st.scheduleLocal(Math.max(160, cfg.localDebounce)), { passive: true });
-    el.addEventListener('focus', () => st.scheduleLocal(100), { passive: true });
-    el.addEventListener('click', () => st.scheduleLocal(90), { passive: true });
-    st.scheduleLocal(180);
+    el.addEventListener('input', () => st.schedule({ delay: cfg.localDebounce, allowAi: true, changed: true }), { passive: true });
+    el.addEventListener('paste', () => st.schedule({ delay: Math.max(180, cfg.localDebounce), allowAi: true, changed: true }), { passive: true });
+    el.addEventListener('cut', () => st.schedule({ delay: Math.max(180, cfg.localDebounce), allowAi: true, changed: true }), { passive: true });
+    el.addEventListener('focus', () => st.schedule({ delay: 120, allowAi: false, changed: false }), { passive: true });
+    el.addEventListener('click', () => st.schedule({ delay: 100, allowAi: false, changed: false }), { passive: true });
+    st.schedule({ delay: 220, allowAi: false, changed: false });
     return st;
   }
 
@@ -640,8 +685,9 @@
       }
     } catch (_) {}
 
-    const rich = textarea.parentElement?.querySelector?.('.fr-box .fr-element[contenteditable="true"]');
-    if (!rich && textarea.offsetParent !== null) attach(textarea);
+    const rich = visibleRichForTextarea(textarea);
+    if (rich) attach(rich);
+    else if (textarea.offsetParent !== null) attach(textarea);
   }
 
   function scan(root = document) {
@@ -653,6 +699,11 @@
       if (el instanceof HTMLTextAreaElement) bindTextarea(el);
       else attach(el);
     });
+  }
+
+  function queueScan(root) {
+    clearTimeout(observerTimer);
+    observerTimer = setTimeout(() => scan(root?.isConnected ? root : document), 60);
   }
 
   function boot() {
@@ -678,14 +729,16 @@
     }, true);
 
     const observer = new MutationObserver(mutations => {
+      let candidate = null;
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
-          if (node instanceof Element) scan(node);
+          if (node instanceof Element) candidate = node;
         }
       }
+      if (candidate) queueScan(candidate);
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    document.documentElement.dataset.wtscStatus = 'v400-ready';
+    document.documentElement.dataset.wtscStatus = 'v410-ready';
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
