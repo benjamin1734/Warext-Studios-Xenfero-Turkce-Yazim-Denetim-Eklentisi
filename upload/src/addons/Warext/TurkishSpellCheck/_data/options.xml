@@ -24,7 +24,7 @@ max=800</edit_format_params><sub_options></sub_options><relation group_id="warex
   <option option_id="warextSpellLongTextSegmentSize" edit_format="spinbox" data_type="integer" advanced="0"><default_value>1000</default_value><edit_format_params>min=600
 max=5000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="78"/></option>
   <option option_id="warextSpellLocalDebounce" edit_format="spinbox" data_type="integer" advanced="1"><default_value>360</default_value><edit_format_params>min=100
-max=2000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="79"/></option>
+max=2500</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="79"/></option>
   <option option_id="warextSpellLiveWindow" edit_format="spinbox" data_type="integer" advanced="1"><default_value>1500</default_value><edit_format_params>min=400
 max=4000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="80"/></option>
 
@@ -43,10 +43,14 @@ ollama=Ollama / yerel OpenAI-compatible</edit_format_params><sub_options></sub_o
 max=30</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="170"/></option>
   <option option_id="warextSpellAiMaxChars" edit_format="spinbox" data_type="integer" advanced="0"><default_value>8000</default_value><edit_format_params>min=500
 max=50000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="180"/></option>
-  <option option_id="warextSpellAiDebounce" edit_format="spinbox" data_type="integer" advanced="0"><default_value>1300</default_value><edit_format_params>min=500
-max=10000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="190"/></option>
+  <option option_id="warextSpellAiDebounce" edit_format="spinbox" data_type="integer" advanced="0"><default_value>1500</default_value><edit_format_params>min=700
+max=12000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="190"/></option>
   <option option_id="warextSpellAiMinChars" edit_format="spinbox" data_type="integer" advanced="0"><default_value>12</default_value><edit_format_params>min=1
 max=1000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="200"/></option>
+  <option option_id="warextSpellAiWindow" edit_format="spinbox" data_type="integer" advanced="0"><default_value>2200</default_value><edit_format_params>min=600
+max=8000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="210"/></option>
+  <option option_id="warextSpellAiMinInterval" edit_format="spinbox" data_type="integer" advanced="1"><default_value>2500</default_value><edit_format_params>min=1000
+max=15000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="220"/></option>
 
   <option option_id="warextSpellCustomWords" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="300"/></option>
   <option option_id="warextSpellCustomProperNames" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="310"/></option>
