@@ -14,7 +14,7 @@ class AiAssist extends AbstractController
             return $this->noPermission();
         }
 
-        return $this->json([
+        return $this->asJson([
             'success' => true,
             'capabilities' => (new AiGateway())->capabilities()
         ]);
@@ -49,17 +49,17 @@ class AiAssist extends AbstractController
 
         $result = (new AiGateway())->analyze($message, $local, $mode);
 
-        return $this->json([
+        return $this->asJson([
             'success' => !empty($result['available']),
             'result' => $result
         ]);
     }
 
-    protected function json(array $data)
+    protected function asJson(array $params)
     {
-        $reply = $this->app()->response();
-        $reply->contentType('application/json');
-        $reply->body(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $this->setResponseType('json');
+        $reply = $this->view('Warext\\TurkishSpellCheck:Json', '', []);
+        $reply->setJsonParams($params);
         return $reply;
     }
 }
