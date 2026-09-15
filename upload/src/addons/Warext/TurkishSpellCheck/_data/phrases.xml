@@ -3,11 +3,11 @@
   <phrase title="admin_navigation.warext_spell_learning" version_id="5300070" version_string="1.0.0"><![CDATA[Warext Yazım Öğrenimi]]></phrase>
   <phrase title="admin_permission.warextSpellLearning" version_id="5300070" version_string="1.0.0"><![CDATA[Warext yazım öğrenimini yönet]]></phrase>
   <phrase title="option_group_warextSpell" version_id="5400000" version_string="1.1.0"><![CDATA[Warext Türkçe Yazım Denetimi]]></phrase>
-  <phrase title="option_group_warextSpell_description" version_id="5400000" version_string="1.1.0"><![CDATA[Yerel, AI ve AI + Yerel destekli Türkçe yazım denetimi. AI İçerik Denetimi kuruluysa aynı harici sağlayıcı ve API bütçesi paylaşılabilir; eklentiler birbirine zorunlu bağımlı değildir. Uzun metin canlı denetimi aktif pencere ve zaman bütçesiyle çalışır.]]></phrase>
+  <phrase title="option_group_warextSpell_description" version_id="5400000" version_string="1.1.0"><![CDATA[Yerel, AI ve AI + Yerel destekli Türkçe yazım denetimi. AI İçerik Denetimi kuruluysa aynı harici sağlayıcı ve API bütçesi paylaşılabilir; eklentiler birbirine zorunlu bağımlı değildir. Uzun metin canlı denetimi aktif pencere ve zaman bütçesiyle, tam belge katmanları ise kullanıcı yazmayı bıraktığında çalışır.]]></phrase>
   <phrase title="option_warextSpellEnabled" version_id="5300070" version_string="1.0.0"><![CDATA[Yazım denetimini etkinleştir]]></phrase>
   <phrase title="option_warextSpellEnabled_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Mesaj editörü ve konu başlığı alanlarında seçilen çalışma moduna göre Türkçe denetimini çalıştırır.]]></phrase>
   <phrase title="option_warextSpellMode" version_id="5400000" version_string="1.1.0"><![CDATA[Yazım denetimi çalışma modu]]></phrase>
-  <phrase title="option_warextSpellMode_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Yerel: yalnız tarayıcıdaki Warext motoru. AI: ağır yerel dil paketlerini yüklemeden yalnız AI. AI + Yerel: önce yerel motor aday üretir, AI bu adayları metin bağlamıyla doğrulayıp yanlış pozitifleri eleyerek nihai öneriyi üretir.]]></phrase>
+  <phrase title="option_warextSpellMode_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Yerel: yalnız tarayıcıdaki Warext motoru. AI: ağır yerel dil paketlerini yüklemeden yalnız AI. AI + Yerel: önce yerel motor aday üretir, AI bu adayları aynı metin neslinin bağlamıyla doğrulayıp yanlış pozitifleri eleyerek nihai öneriyi üretir.]]></phrase>
   <phrase title="option_warextSpellGrammar" version_id="5300070" version_string="1.0.0"><![CDATA[Dilbilgisi ve bağlam denetimi]]></phrase>
   <phrase title="option_warextSpellGrammar_explain" version_id="5300070" version_string="1.0.0"><![CDATA[de/da, ki, soru eki, birleşik-ayrı yazım, kişi, zaman, komşu cümle ve yüksek güvenli bağlam kurallarını denetler.]]></phrase>
   <phrase title="option_warextSpellPunctuation" version_id="5300070" version_string="1.0.0"><![CDATA[Noktalama denetimi]]></phrase>
@@ -29,26 +29,26 @@
   <phrase title="option_warextSpellMaxSuggestions" version_id="5300070" version_string="1.0.0"><![CDATA[Maksimum öneri sayısı]]></phrase>
   <phrase title="option_warextSpellMaxSuggestions_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Canlı öneri alanında aynı anda gösterilecek en fazla düzeltme sayısı.]]></phrase>
   <phrase title="option_warextSpellLongText" version_id="5300076" version_string="1.0.6"><![CDATA[Uzun metin taramasını etkinleştir]]></phrase>
-  <phrase title="option_warextSpellLongText_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Yerel/Hybrid modlarında uzun mesajları arka planda küçük parçalara ayırır. Canlı editör bundan bağımsız olarak yalnız aktif pencereyi denetlediği için tam belge taraması yazmayı bloke etmez.]]></phrase>
+  <phrase title="option_warextSpellLongText_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Yerel/Hybrid modlarında uzun mesajları küçük parçalara ayırır. Tam belge taraması kullanıcı yazarken iptal edilir, giriş sakinleştikten sonra idle dilimlerinde çalışır; Froala gizli textarea ile görünen editör aynı anda iki kez taranmaz.]]></phrase>
   <phrase title="option_warextSpellLongTextThreshold" version_id="5300070" version_string="1.0.0"><![CDATA[Uzun metin eşiği]]></phrase>
   <phrase title="option_warextSpellLongTextThreshold_explain" version_id="5300076" version_string="1.0.6"><![CDATA[Parçalı uzun metin taramasının başlayacağı minimum karakter sayısı. Varsayılan 700.]]></phrase>
   <phrase title="option_warextSpellLongTextMaxIssues" version_id="5300076" version_string="1.0.6"><![CDATA[Uzun metinde maksimum tespit]]></phrase>
   <phrase title="option_warextSpellLongTextMaxIssues_explain" version_id="5300076" version_string="1.0.6"><![CDATA[Tek uzun mesaj taramasında bellekte tutulacak en fazla tespit sayısı. Varsayılan 160.]]></phrase>
   <phrase title="option_warextSpellLongTextSegmentSize" version_id="5300076" version_string="1.0.6"><![CDATA[Uzun metin parça boyutu]]></phrase>
-  <phrase title="option_warextSpellLongTextSegmentSize_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Arka plan uzun metin taramasında yaklaşık parça boyutu. Çalışma zamanı performans koruması aşırı büyük analiz bloklarını ayrıca sınırlar.]]></phrase>
+  <phrase title="option_warextSpellLongTextSegmentSize_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Arka plan uzun metin taramasında yaklaşık parça boyutu. V1.1.0 performans koruması gerçek çalışma parçasını en fazla 1000 karakterle sınırlar.]]></phrase>
   <phrase title="option_warextSpellLocalDebounce" version_id="5400000" version_string="1.1.0"><![CDATA[Canlı yerel denetim beklemesi (ms)]]></phrase>
   <phrase title="option_warextSpellLocalDebounce_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Son girdiden sonra aktif pencerenin yerel olarak denetlenmesi için beklenecek süre. Yavaş analiz algılanırsa çalışma zamanı bu değeri geçici olarak otomatik yükseltir.]]></phrase>
   <phrase title="option_warextSpellLiveWindow" version_id="5400000" version_string="1.1.0"><![CDATA[Canlı analiz pencere boyutu]]></phrase>
-  <phrase title="option_warextSpellLiveWindow_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Her tuş sonrası tam belge yerine imleç çevresinde analiz edilecek yaklaşık karakter sayısı. Çok ağır metinlerde pencere otomatik daralır.]]></phrase>
+  <phrase title="option_warextSpellLiveWindow_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Her giriş sonrası tam belge yerine imleç çevresinde analiz edilecek yaklaşık karakter sayısı. Çok ağır metinlerde pencere otomatik daralır.]]></phrase>
 
   <phrase title="option_warextSpellAiEnabled" version_id="5400000" version_string="1.1.0"><![CDATA[AI yazım desteğini etkinleştir]]></phrase>
-  <phrase title="option_warextSpellAiEnabled_explain" version_id="5400000" version_string="1.1.0"><![CDATA[AI veya AI + Yerel modunda sunucu taraflı AI isteğine izin verir. API anahtarları hiçbir zaman tarayıcıya gönderilmez.]]></phrase>
+  <phrase title="option_warextSpellAiEnabled_explain" version_id="5400000" version_string="1.1.0"><![CDATA[AI veya AI + Yerel modunda sunucu taraflı AI isteğine izin verir. API anahtarları hiçbir zaman tarayıcıya gönderilmez. Sadece focus/tıklama AI çağrısı üretmez.]]></phrase>
   <phrase title="option_warextSpellAiSource" version_id="5400000" version_string="1.1.0"><![CDATA[AI sağlayıcı kaynağı]]></phrase>
   <phrase title="option_warextSpellAiSource_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Otomatik modda AI İçerik Denetimi 1.2.0+ ve yapılandırılmış provider varsa onun model/anahtar/bütçe katmanı paylaşılır; yoksa Yazım Denetimi kendi standalone ayarına geri düşer.]]></phrase>
   <phrase title="option_warextSpellAiProvider" version_id="5400000" version_string="1.1.0"><![CDATA[Standalone AI provider tipi]]></phrase>
-  <phrase title="option_warextSpellAiProvider_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Ortak AI İçerik Denetimi providerı kullanılmadığında Yazım Denetiminin kendi sağlayıcısı. OpenAI Responses API veya OpenAI-compatible uçlar desteklenir.]]></phrase>
+  <phrase title="option_warextSpellAiProvider_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Ortak AI İçerik Denetimi providerı kullanılmadığında Yazım Denetiminin kendi sağlayıcısı. OpenAI Responses API, OpenRouter, özel OpenAI-compatible uçlar ve Ollama desteklenir.]]></phrase>
   <phrase title="option_warextSpellAiBaseUrl" version_id="5400000" version_string="1.1.0"><![CDATA[Standalone OpenAI-compatible base URL]]></phrase>
-  <phrase title="option_warextSpellAiBaseUrl_explain" version_id="5400000" version_string="1.1.0"><![CDATA[OpenRouter, özel API veya Ollama kullanırken /chat/completions öncesindeki base URL. Doğrudan OpenAI providerında kullanılmaz.]]></phrase>
+  <phrase title="option_warextSpellAiBaseUrl_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Özel API veya Ollama için HTTP/HTTPS base URL. Gömülü kullanıcı adı/şifre reddedilir; /chat/completions yolu gerekirse otomatik eklenir. OpenRouter seçeneği resmi endpoint'i kullanır.]]></phrase>
   <phrase title="option_warextSpellAiKey" version_id="5400000" version_string="1.1.0"><![CDATA[Standalone AI API anahtarı]]></phrase>
   <phrase title="option_warextSpellAiKey_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Yalnız sunucu tarafında tutulur. Ollama gibi anahtarsız yerel uçlarda boş bırakılabilir.]]></phrase>
   <phrase title="option_warextSpellAiModel" version_id="5400000" version_string="1.1.0"><![CDATA[Standalone AI model kimliği]]></phrase>
@@ -56,11 +56,15 @@
   <phrase title="option_warextSpellAiTimeout" version_id="5400000" version_string="1.1.0"><![CDATA[AI zaman aşımı (saniye)]]></phrase>
   <phrase title="option_warextSpellAiTimeout_explain" version_id="5400000" version_string="1.1.0"><![CDATA[AI servis yanıt vermezse bu süre sonunda istek bırakılır. Hybrid modunda yerel sonuç korunur.]]></phrase>
   <phrase title="option_warextSpellAiMaxChars" version_id="5400000" version_string="1.1.0"><![CDATA[AI isteği maksimum karakter]]></phrase>
-  <phrase title="option_warextSpellAiMaxChars_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Tek AI yazım isteğinde gönderilebilecek üst sınır. Canlı editör çok uzun belgelerde maliyeti ve gecikmeyi azaltmak için aktif çalışma penceresini gönderir.]]></phrase>
+  <phrase title="option_warextSpellAiMaxChars_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Sunucu tarafında tek AI yazım isteğinde kabul edilebilecek mutlak karakter üst sınırı.]]></phrase>
   <phrase title="option_warextSpellAiDebounce" version_id="5400000" version_string="1.1.0"><![CDATA[AI sorgu beklemesi (ms)]]></phrase>
-  <phrase title="option_warextSpellAiDebounce_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Son yazımdan sonra AI sorgusunun başlaması için beklenecek süre. Yeni giriş eski bekleyen/açık isteği iptal eder ve aynı metin kısa süreli istemci önbelleğinden kullanılabilir.]]></phrase>
+  <phrase title="option_warextSpellAiDebounce_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Son gerçek metin değişikliğinden sonra AI sorgusunun başlaması için beklenecek süre. Yeni giriş eski bekleyen/açık isteği iptal eder; focus veya tıklama tek başına sorgu oluşturmaz.]]></phrase>
   <phrase title="option_warextSpellAiMinChars" version_id="5400000" version_string="1.1.0"><![CDATA[AI için minimum karakter]]></phrase>
   <phrase title="option_warextSpellAiMinChars_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Bu uzunluğun altındaki aktif metin için AI çağrısı yapılmaz. Gereksiz API kullanımını azaltır.]]></phrase>
+  <phrase title="option_warextSpellAiWindow" version_id="5400000" version_string="1.1.0"><![CDATA[AI canlı çalışma penceresi (karakter)]]></phrase>
+  <phrase title="option_warextSpellAiWindow_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Canlı yazım sırasında AI'ya tüm belge yerine imleç çevresinden gönderilecek yaklaşık metin boyutu. Varsayılan 2200; 10.000+ karakterlik belgelerde çalışma zamanı bunu 1600 karaktere kadar otomatik daraltır.]]></phrase>
+  <phrase title="option_warextSpellAiMinInterval" version_id="5400000" version_string="1.1.0"><![CDATA[AI istekleri arası minimum süre (ms)]]></phrase>
+  <phrase title="option_warextSpellAiMinInterval_explain" version_id="5400000" version_string="1.1.0"><![CDATA[Bir editörden art arda harici AI sorgusu başlatılabilecek minimum süre. Debounce'a ek ikinci korumadır; hızlı yazım ve ardışık input eventlerinde API tüketimini sınırlar.]]></phrase>
 
   <phrase title="option_warextSpellCustomWords" version_id="5300070" version_string="1.0.0"><![CDATA[Forum özel sözlüğü]]></phrase>
   <phrase title="option_warextSpellCustomWords_explain" version_id="5300070" version_string="1.0.0"><![CDATA[Doğru kabul edilecek özel kelimeleri satır satır veya virgülle ayırarak girin.]]></phrase>
