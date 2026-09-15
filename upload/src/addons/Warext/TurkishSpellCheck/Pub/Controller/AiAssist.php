@@ -29,14 +29,18 @@ class AiAssist extends AbstractController
 
         $this->assertPostOnly();
 
-        $message = (string)$this->filter('message', 'str');
+        $message = trim((string)$this->filter('message', 'str'));
         $mode = (string)$this->filter('mode', 'str');
+        $includeModeration = (bool)$this->filter('include_moderation', 'bool');
         if (!in_array($mode, ['ai', 'hybrid'], true)) $mode = 'ai';
 
         $maxChars = max(500, min(50000, (int)(\XF::options()->warextSpellAiMaxChars ?? 8000)));
         if (mb_strlen($message, 'UTF-8') > $maxChars)
         {
             $message = mb_substr($message, 0, $maxChars, 'UTF-8');
+            // A truncated editor window is not the final authored message, so its
+            // moderation score must never be cached/reused as a full-post score.
+            $includeModeration = false;
         }
 
         $localRaw = (string)$this->filter('local_context', 'str');
@@ -47,7 +51,7 @@ class AiAssist extends AbstractController
             if (is_array($decoded)) $local = $decoded;
         }
 
-        $result = (new AiGateway())->analyze($message, $local, $mode);
+        $result = (new AiGateway())->analyze($message, $local, $mode, $includeModeration);
 
         return $this->asJson([
             'success' => !empty($result['available']),
