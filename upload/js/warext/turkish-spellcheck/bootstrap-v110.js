@@ -4,15 +4,20 @@
   if (window.__warextTurkishSpellBootstrapV110) return;
   window.__warextTurkishSpellBootstrapV110 = true;
 
-  const VERSION = '1.0.6';
-  const ASSET_VERSION = '3130';
+  const VERSION = '1.1.0';
+  const ASSET_VERSION = '4000';
   const script = document.currentScript;
   const scriptUrl = script?.src || '';
   const baseDir = scriptUrl ? scriptUrl.slice(0,scriptUrl.lastIndexOf('/') + 1) : '';
+  const config = document.getElementById('wtsc-config')?.dataset || {};
+  const requestedMode = String(config.mode || 'local').toLowerCase();
+  const mode = ['local','ai','hybrid'].includes(requestedMode) ? requestedMode : 'local';
+  const needsLocal = mode === 'local' || mode === 'hybrid';
   let started = false;
   let observer = null;
 
   document.documentElement.dataset.wtscBootstrap = VERSION;
+  document.documentElement.dataset.wtscMode = mode;
 
   function editorExists(root = document) {
     if (root instanceof Element && root.matches?.('.js-editor,.fr-element[contenteditable="true"],textarea[name="message"],input[name="title"]')) return true;
@@ -56,53 +61,77 @@
     anchor.insertAdjacentElement('afterend',bar);
   }
 
+  async function loadLocalEngine() {
+    await loadScript('text-core-v110.js',() => !!window.WarextTextCoreV110);
+    await loadScript('lexicon-v200.js',() => !!window.WarextLexiconV200);
+    await loadScript('dictionary-v110.js',() => !!window.WarextTurkishSpellEngineV110);
+    await loadScript('corrections-v110.js',() => !!window.WarextCorrectionMapV110);
+    await loadScript('language-v110.js',() => !!window.__warextLanguageV110);
+    await loadScript('semantic-v110.js',() => !!window.__warextSemanticV120);
+    await loadScript('semantic-deep-v110.js',() => !!window.__warextSemanticDeepV130);
+    await loadScript('semantic-context-v110.js',() => !!window.__warextSemanticContextV130);
+    await loadScript('entities-v200.js',() => !!window.WarextEntitiesV200);
+    await loadScript('idioms-v200.js',() => !!window.WarextIdiomsV200);
+    await loadScript('lm-v200.js',() => !!window.WarextLmV200);
+    await loadScript('micro-model-v200.js',() => !!window.WarextMicroModelV200);
+    await loadScript('knowledge-v200.js',() => !!window.__warextKnowledgeV200);
+    await loadScript('micro-integration-v200.js',() => !!window.__warextMicroIntegrationV200);
+    await loadScript('learning-v200.js',() => !!window.__warextLearningV200);
+    await loadScript('quality-v210.js',() => !!window.__warextQualityV210);
+    await loadScript('quality-v220.js',() => !!window.__warextQualityV220);
+    await loadScript('syntax-v220.js',() => !!window.__warextSyntaxV220);
+    await loadScript('syntax-tuning-v220.js',() => !!window.__warextSyntaxTuningV220);
+    await loadScript('semantic-ui-v110.js',() => !!window.__warextSemanticUiV130);
+    await loadScript('context-v230.js',() => !!window.__warextContextV230);
+    await loadScript('context-tuning-v231.js',() => !!window.__warextContextTuningV231);
+    await loadScript('semantic-model-v300.js',() => !!window.WarextSemanticModelV300);
+    await loadScript('semantic-knowledge-v310.js',() => !!window.WarextSemanticKnowledgeV310);
+    await loadScript('runtime-v240.js',() => !!window.__warextRuntimeV240);
+    await loadScript('semantic-document-v300.js',() => !!window.__warextSemanticDocumentV300);
+    await loadScript('semantic-tuning-v301.js',() => !!window.__warextSemanticTuningV301);
+    await loadScript('semantic-tuning-v302.js',() => !!window.__warextSemanticTuningV302);
+    await loadScript('semantic-reasoning-v310.js',() => !!window.__warextSemanticReasoningV310);
+    await loadScript('semantic-reasoning-tuning-v311.js',() => !!window.__warextSemanticReasoningTuningV311);
+    await loadScript('contextual-orthography-v312.js',() => !!window.__warextContextualOrthographyV312);
+    await loadScript('contextual-orthography-rerank-v312.js',() => !!window.__warextContextualOrthographyRerankV312);
+    await loadScript('contextual-orthography-guard-v312.js',() => !!window.__warextContextualOrthographyGuardV312);
+    if (!window.WarextTurkishSpellEngineV110) throw new Error('engine');
+    await loadScript('performance-guard-v313.js',() => !!window.WarextPerformanceGuardV313);
+    await loadScript('integration-v105.js',() => !!window.WarextWritingIntegration);
+  }
+
+  function deferDocumentLayer() {
+    const run = () => {
+      const inputPending = (() => {
+        try { return !!navigator.scheduling?.isInputPending?.({includeContinuous:true}); }
+        catch (_) { return false; }
+      })();
+      if (inputPending) {
+        setTimeout(run,1200);
+        return;
+      }
+      loadScript('document-v300.js',() => !!window.__warextDocumentV300).catch(() => {});
+    };
+    setTimeout(() => {
+      if (typeof requestIdleCallback === 'function') requestIdleCallback(run,{timeout:1800});
+      else run();
+    },3500);
+  }
+
   async function start() {
     if (started) return;
     started = true;
     document.documentElement.dataset.wtscStatus = 'assets-loading';
     try {
-      await loadScript('text-core-v110.js',() => !!window.WarextTextCoreV110);
-      await loadScript('lexicon-v200.js',() => !!window.WarextLexiconV200);
-      await loadScript('dictionary-v110.js',() => !!window.WarextTurkishSpellEngineV110);
-      await loadScript('corrections-v110.js',() => !!window.WarextCorrectionMapV110);
-      await loadScript('language-v110.js',() => !!window.__warextLanguageV110);
-      await loadScript('semantic-v110.js',() => !!window.__warextSemanticV120);
-      await loadScript('semantic-deep-v110.js',() => !!window.__warextSemanticDeepV130);
-      await loadScript('semantic-context-v110.js',() => !!window.__warextSemanticContextV130);
-      await loadScript('entities-v200.js',() => !!window.WarextEntitiesV200);
-      await loadScript('idioms-v200.js',() => !!window.WarextIdiomsV200);
-      await loadScript('lm-v200.js',() => !!window.WarextLmV200);
-      await loadScript('micro-model-v200.js',() => !!window.WarextMicroModelV200);
-      await loadScript('knowledge-v200.js',() => !!window.__warextKnowledgeV200);
-      await loadScript('micro-integration-v200.js',() => !!window.__warextMicroIntegrationV200);
-      await loadScript('learning-v200.js',() => !!window.__warextLearningV200);
-      await loadScript('quality-v210.js',() => !!window.__warextQualityV210);
-      await loadScript('quality-v220.js',() => !!window.__warextQualityV220);
-      await loadScript('syntax-v220.js',() => !!window.__warextSyntaxV220);
-      await loadScript('syntax-tuning-v220.js',() => !!window.__warextSyntaxTuningV220);
-      await loadScript('semantic-ui-v110.js',() => !!window.__warextSemanticUiV130);
-      await loadScript('context-v230.js',() => !!window.__warextContextV230);
-      await loadScript('context-tuning-v231.js',() => !!window.__warextContextTuningV231);
-      await loadScript('semantic-model-v300.js',() => !!window.WarextSemanticModelV300);
-      await loadScript('semantic-knowledge-v310.js',() => !!window.WarextSemanticKnowledgeV310);
-      await loadScript('runtime-v240.js',() => !!window.__warextRuntimeV240);
-      await loadScript('semantic-document-v300.js',() => !!window.__warextSemanticDocumentV300);
-      await loadScript('semantic-tuning-v301.js',() => !!window.__warextSemanticTuningV301);
-      await loadScript('semantic-tuning-v302.js',() => !!window.__warextSemanticTuningV302);
-      await loadScript('semantic-reasoning-v310.js',() => !!window.__warextSemanticReasoningV310);
-      await loadScript('semantic-reasoning-tuning-v311.js',() => !!window.__warextSemanticReasoningTuningV311);
-      await loadScript('contextual-orthography-v312.js',() => !!window.__warextContextualOrthographyV312);
-      await loadScript('contextual-orthography-rerank-v312.js',() => !!window.__warextContextualOrthographyRerankV312);
-      await loadScript('contextual-orthography-guard-v312.js',() => !!window.__warextContextualOrthographyGuardV312);
-      if (!window.WarextTurkishSpellEngineV110) throw new Error('engine');
-      await loadScript('performance-guard-v313.js',() => !!window.WarextPerformanceGuardV313);
-      await loadScript('integration-v105.js',() => !!window.WarextWritingIntegration);
-      await loadScript('editor-v110.js',() => !!window.__warextTurkishSpellCheckV110);
-      await loadScript('longtext-v110.js',() => !!window.__warextLongTextV110);
-      await loadScript('document-v300.js',() => !!window.__warextDocumentV300);
+      if (needsLocal) await loadLocalEngine();
+      await loadScript('editor-v400.js',() => !!window.__warextTurkishSpellCheckV400);
+      if (needsLocal) {
+        await loadScript('longtext-v110.js',() => !!window.__warextLongTextV110);
+        deferDocumentLayer();
+      }
       document.documentElement.dataset.wtscStatus = 'assets-ready';
-      document.documentElement.dataset.wtscSemantic = 'v313';
-      document.documentElement.dataset.wtscPerformance = '3.1.3';
+      document.documentElement.dataset.wtscSemantic = needsLocal ? 'v313' : 'not-loaded';
+      document.documentElement.dataset.wtscPerformance = needsLocal ? 'v400-bounded-window' : 'v400-ai-only';
       observer?.disconnect();
     } catch (_) {
       showAssetError();
