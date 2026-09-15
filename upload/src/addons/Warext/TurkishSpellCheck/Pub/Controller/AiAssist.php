@@ -29,17 +29,29 @@ class AiAssist extends AbstractController
 
         $this->assertPostOnly();
 
-        $message = trim((string)$this->filter('message', 'str'));
-        $mode = (string)$this->filter('mode', 'str');
-        $includeModeration = (bool)$this->filter('include_moderation', 'bool');
-        if (!in_array($mode, ['ai', 'hybrid'], true)) $mode = 'ai';
+        $options = \XF::options();
+        $configuredMode = strtolower((string)($options->warextSpellMode ?? 'local'));
+        if (empty($options->warextSpellAiEnabled) || !in_array($configuredMode, ['ai', 'hybrid'], true))
+        {
+            return $this->asJson([
+                'success' => false,
+                'result' => [
+                    'available' => false,
+                    'reason' => 'ai_mode_disabled',
+                    'writing' => [],
+                    'moderation' => []
+                ]
+            ]);
+        }
 
-        $maxChars = max(500, min(50000, (int)(\XF::options()->warextSpellAiMaxChars ?? 8000)));
+        $message = trim((string)$this->filter('message', 'str'));
+        $mode = $configuredMode;
+        $includeModeration = (bool)$this->filter('include_moderation', 'bool');
+
+        $maxChars = max(500, min(50000, (int)($options->warextSpellAiMaxChars ?? 8000)));
         if (mb_strlen($message, 'UTF-8') > $maxChars)
         {
             $message = mb_substr($message, 0, $maxChars, 'UTF-8');
-            // A truncated editor window is not the final authored message, so its
-            // moderation score must never be cached/reused as a full-post score.
             $includeModeration = false;
         }
 
