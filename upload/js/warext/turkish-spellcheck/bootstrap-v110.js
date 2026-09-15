@@ -5,7 +5,7 @@
   window.__warextTurkishSpellBootstrapV110 = true;
 
   const VERSION = '1.1.0';
-  const ASSET_VERSION = '4000';
+  const ASSET_VERSION = '4100';
   const script = document.currentScript;
   const scriptUrl = script?.src || '';
   const baseDir = scriptUrl ? scriptUrl.slice(0,scriptUrl.lastIndexOf('/') + 1) : '';
@@ -115,7 +115,7 @@
     setTimeout(() => {
       if (typeof requestIdleCallback === 'function') requestIdleCallback(run,{timeout:1800});
       else run();
-    },3500);
+    },4500);
   }
 
   async function start() {
@@ -131,7 +131,7 @@
       }
       document.documentElement.dataset.wtscStatus = 'assets-ready';
       document.documentElement.dataset.wtscSemantic = needsLocal ? 'v313' : 'not-loaded';
-      document.documentElement.dataset.wtscPerformance = needsLocal ? 'v400-bounded-window' : 'v400-ai-only';
+      document.documentElement.dataset.wtscPerformance = needsLocal ? 'v410-bounded-window' : 'v410-ai-only';
       observer?.disconnect();
     } catch (_) {
       showAssetError();
