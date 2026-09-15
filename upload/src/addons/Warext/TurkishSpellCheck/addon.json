@@ -1,9 +1,9 @@
 {
     "legacy_addon_id": "",
     "title": "Warext Studios | XenForo Türkçe Yazım Denetimi",
-    "description": "Tamamen yerel Türkçe yazım, dilbilgisi, noktalama ve belge düzeyi anlam denetimi. V3.1.3; uzun metinlerde değişen bölgeyi canlı olarak sınırlı pencerede analiz eder, yazma durduğunda süre bütçeli hiyerarşik belge taraması ve semantik omurga kullanır. V3.1.2 bağlamsal yazım onarımı, önerme grafiği, morfoloji, yerel dil modeli ve opsiyonel entegrasyon köprüsü korunur. Harici API, model veya servis gerekmez.",
-    "version_id": 5300076,
-    "version_string": "1.0.6",
+    "description": "Türkçe yazım denetimi için üç çalışma modu: Yerel, AI ve AI + Yerel. v1.1.0 ile canlı editör v4 zaman-bütçeli aktif pencere mimarisine geçirilmiştir; uzun metinde her tuşta tam belge taraması yapılmaz, ağır yerel analiz otomatik daraltılır ve arka plan taraması kullanıcı girdisinden ayrılır. AI modunda büyük yerel sözlük/dil modeli paketleri yüklenmez. Hybrid modunda yerel motorun adayları AI'ya bağlam olarak gönderilir; AI yanlış pozitifleri eleyip nihai öneriyi üretir. Warext AI İçerik Denetimi 1.2.0+ kuruluysa aynı provider/model/API bütçesi tek kaynaktan paylaşılabilir; değilse standalone OpenAI veya OpenAI-compatible sağlayıcı kullanılabilir. Eklentiler birbirine zorunlu bağımlı değildir.",
+    "version_id": 5400000,
+    "version_string": "1.1.0",
     "dev": "Warext Studios | Support Discord Server",
     "dev_url": "https://discord.gg/tgsV5XMcFS",
     "faq_url": "",
