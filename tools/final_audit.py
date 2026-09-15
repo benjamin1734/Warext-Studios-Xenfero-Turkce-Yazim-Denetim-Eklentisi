@@ -9,6 +9,7 @@ from pathlib import Path
 ADDON_REL = Path('src/addons/Warext/TurkishSpellCheck')
 RUNTIME_REL = Path('js/warext/turkish-spellcheck')
 RUNTIME_FORBIDDEN = re.compile(r'https?://|WebSocket|EventSource|sendBeacon|axios|\.ajax\s*\(', re.I)
+ALLOWED_FETCH_FILES = {'learning-v200.js', 'editor-v400.js'}
 
 
 def fail(message):
@@ -66,9 +67,11 @@ def check_addon_data(root, version):
     for path in sorted(data_root.rglob('*.xml')):
         parse_xml(path)
     routes = parse_xml(data_root / 'routes.xml').getroot()
+    route_prefixes = set()
     for route in routes.findall('route'):
         controller = route.attrib.get('controller', '')
         route_type = route.attrib.get('route_type', '')
+        route_prefixes.add(route.attrib.get('route_prefix', ''))
         if ':' not in controller:
             fail(f'Geçersiz controller rotası: {controller}')
         addon_id, name = controller.split(':', 1)
@@ -77,6 +80,9 @@ def check_addon_data(root, version):
         area = 'Admin' if route_type == 'admin' else 'Pub'
         if not (addon_root / area / 'Controller' / f'{name}.php').is_file():
             fail(f'Route controller dosyası eksik: {name}')
+    if 'warext-spell-ai' not in route_prefixes:
+        fail('AI yazım desteği public rotası eksik')
+
     options_root = parse_xml(data_root / 'options.xml').getroot()
     phrases_root = parse_xml(data_root / 'phrases.xml').getroot()
     option_ids = {node.attrib.get('option_id', '') for node in options_root.findall('option')}
@@ -86,11 +92,23 @@ def check_addon_data(root, version):
             fail('Boş option_id bulundu')
         if f'option_{option_id}' not in phrase_titles or f'option_{option_id}_explain' not in phrase_titles:
             fail(f'Option phrase eksik: {option_id}')
+    for required_option in {
+        'warextSpellMode', 'warextSpellAiEnabled', 'warextSpellAiSource', 'warextSpellAiProvider',
+        'warextSpellAiModel', 'warextSpellAiDebounce', 'warextSpellLocalDebounce', 'warextSpellLiveWindow'
+    }:
+        if required_option not in option_ids:
+            fail(f'V1.1.0 çalışma modu ayarı eksik: {required_option}')
+
     template = read_text(data_root / 'template_modifications.xml')
     referenced = set(re.findall(r'\$xf\.options\.([A-Za-z0-9_]+)', template))
     missing = sorted(referenced - option_ids)
     if missing:
         fail('Template içinde tanımsız option bulundu: ' + ', '.join(missing))
+    if "link('warext-spell-feedback')" not in template:
+        fail('Yerel geri bildirim route bağlantısı eksik')
+    if "link('warext-spell-ai/analyze')" not in template:
+        fail('AI yazım desteği route bağlantısı eksik')
+
     bootstrap = read_text(root / 'upload' / RUNTIME_REL / 'bootstrap-v110.js')
     asset_match = re.search(r"const ASSET_VERSION = '([^']+)';", bootstrap)
     if not asset_match:
@@ -98,8 +116,6 @@ def check_addon_data(root, version):
     asset_version = asset_match.group(1)
     if template.count(f'?wtsc={asset_version}') < 2:
         fail('Template önbellek kırıcı bootstrap ile eşleşmiyor')
-    if "link('warext-spell-feedback')" not in template:
-        fail('Yerel geri bildirim route bağlantısı eksik')
     if f"const VERSION = '{version}';" not in bootstrap:
         fail('Bootstrap eklenti sürümü addon.json ile eşleşmiyor')
     integration = read_text(root / 'upload' / RUNTIME_REL / 'integration-v105.js')
@@ -113,8 +129,18 @@ def check_runtime(root, version, asset_version):
     bootstrap = read_text(runtime / 'bootstrap-v110.js')
     if f"const VERSION = '{version}';" not in bootstrap or f"const ASSET_VERSION = '{asset_version}';" not in bootstrap:
         fail('Bootstrap sürümü geçersiz')
-    if "dataset.wtscSemantic = 'v313'" not in bootstrap:
-        fail('V3.1.3 çalışma zamanı işareti eksik')
+    if "dataset.wtscSemantic = needsLocal ? 'v313' : 'not-loaded'" not in bootstrap:
+        fail('Yerel/AI koşullu V3.1.3 çalışma zamanı işareti eksik')
+    for marker in [
+        "const needsLocal = mode === 'local' || mode === 'hybrid';",
+        "await loadScript('editor-v400.js'",
+        "if (needsLocal) await loadLocalEngine();",
+        "if (needsLocal) {",
+        "deferDocumentLayer();"
+    ]:
+        if marker not in bootstrap:
+            fail(f'V4 koşullu runtime özelliği eksik: {marker}')
+
     required = {
         'text-core-v110.js','lexicon-v200.js','dictionary-v110.js','corrections-v110.js','language-v110.js',
         'semantic-v110.js','semantic-deep-v110.js','semantic-context-v110.js','entities-v200.js','idioms-v200.js',
@@ -123,7 +149,7 @@ def check_runtime(root, version, asset_version):
         'context-v230.js','context-tuning-v231.js','semantic-model-v300.js','semantic-knowledge-v310.js','runtime-v240.js',
         'semantic-document-v300.js','semantic-tuning-v301.js','semantic-tuning-v302.js','semantic-reasoning-v310.js',
         'semantic-reasoning-tuning-v311.js','contextual-orthography-v312.js','contextual-orthography-rerank-v312.js',
-        'contextual-orthography-guard-v312.js','performance-guard-v313.js','integration-v105.js','editor-v110.js',
+        'contextual-orthography-guard-v312.js','performance-guard-v313.js','integration-v105.js','editor-v400.js',
         'longtext-v110.js','document-v300.js'
     }
     loaded = set(re.findall(r"loadScript\('([^']+\.js)'", bootstrap))
@@ -137,16 +163,37 @@ def check_runtime(root, version, asset_version):
         fail('Zorunlu runtime dosyası bootstrap tarafından yüklenmiyor: ' + ', '.join(not_loaded))
     if orphan:
         fail('Bootstrap tarafından yüklenmeyen runtime JS bulundu: ' + ', '.join(orphan))
+
     for path in sorted(runtime.glob('*.js')):
         text = read_text(path)
         match = RUNTIME_FORBIDDEN.search(text)
         if match:
-            fail(f'Harici runtime ağ kullanımı bulundu: {path}: {match.group(0)}')
-        if re.search(r'fetch\s*\(', text) and path.name != 'learning-v200.js':
+            fail(f'Runtime içinde doğrudan harici ağ hedefi bulundu: {path}: {match.group(0)}')
+        if re.search(r'fetch\s*\(', text) and path.name not in ALLOWED_FETCH_FILES:
             fail(f'İzin verilmeyen runtime fetch çağrısı: {path}')
+
     learning = read_text(runtime / 'learning-v200.js')
     if "credentials:'same-origin'" not in learning or "body.set('_xfToken'" not in learning:
         fail('Yerel same-origin geri bildirim güvenliği eksik')
+
+    editor = read_text(runtime / 'editor-v400.js')
+    for marker in [
+        "const VERSION = '4.0.0';",
+        "const localEnabled = () => cfg.mode === 'local' || cfg.mode === 'hybrid';",
+        "const aiEnabled = () => cfg.aiEnabled && cfg.aiEndpoint",
+        'new AbortController()',
+        'requestIdleCallback',
+        "credentials: 'same-origin'",
+        "body.set('_xfToken'",
+        'scope.text',
+        'localContextForScope',
+        'st.slowUntil = Date.now() + 5000'
+    ]:
+        if marker not in editor:
+            fail(f'V4 editör performans/AI özelliği eksik: {marker}')
+    if "addEventListener('keyup'" in editor:
+        fail('V4 editör keyup başına ayrı analiz kuyruğu oluşturmamalı')
+
     semantic = read_text(runtime / 'semantic-reasoning-v310.js')
     for marker in ['externalDependencies:0','propositionGraph:true','entityMemory:true','coreferenceResolution:true','stateLedger:true','selectionalSemantics:true','causalKnowledgeBase:true']:
         if marker not in semantic:
@@ -167,11 +214,13 @@ def check_runtime(root, version, asset_version):
     for marker in ["const VERSION = '3.1.3';",'DEEP_SETTLE_MS = 2550',"deep && st.mode === 'live-window'",'settled:deep','forceDeep:deep','rangeIndex(el)']:
         if marker not in document:
             fail(f'V3.1.3 belge denetimi özelliği eksik: {marker}')
+
     guard_pos = bootstrap.find("loadScript('performance-guard-v313.js'")
-    for asset in ['editor-v110.js','longtext-v110.js','document-v300.js']:
-        asset_pos = bootstrap.find(f"loadScript('{asset}'")
-        if guard_pos < 0 or asset_pos <= guard_pos:
-            fail(f'Performans koruması {asset} dosyasından önce yüklenmiyor')
+    editor_pos = bootstrap.find("loadScript('editor-v400.js'")
+    long_pos = bootstrap.find("loadScript('longtext-v110.js'")
+    document_pos = bootstrap.find("loadScript('document-v300.js'")
+    if guard_pos < 0 or editor_pos <= guard_pos or long_pos <= guard_pos or document_pos <= guard_pos:
+        fail('Yerel performans koruması editör/uzun metin/belge katmanından önce yüklenmiyor')
 
 
 def check_resources(root):
@@ -256,7 +305,10 @@ def check_package(root, package_path, version, version_id):
             'upload/src/addons/Warext/TurkishSpellCheck/addon.json',
             'upload/src/addons/Warext/TurkishSpellCheck/Setup.php',
             'upload/src/addons/Warext/TurkishSpellCheck/hashes.json',
+            'upload/src/addons/Warext/TurkishSpellCheck/Pub/Controller/AiAssist.php',
+            'upload/src/addons/Warext/TurkishSpellCheck/Service/AiGateway.php',
             'upload/js/warext/turkish-spellcheck/bootstrap-v110.js',
+            'upload/js/warext/turkish-spellcheck/editor-v400.js',
             'upload/js/warext/turkish-spellcheck/performance-guard-v313.js',
             'upload/js/warext/turkish-spellcheck/document-v300.js'
         }
