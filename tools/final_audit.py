@@ -94,7 +94,8 @@ def check_addon_data(root, version):
             fail(f'Option phrase eksik: {option_id}')
     for required_option in {
         'warextSpellMode', 'warextSpellAiEnabled', 'warextSpellAiSource', 'warextSpellAiProvider',
-        'warextSpellAiModel', 'warextSpellAiDebounce', 'warextSpellLocalDebounce', 'warextSpellLiveWindow'
+        'warextSpellAiModel', 'warextSpellAiDebounce', 'warextSpellAiWindow', 'warextSpellAiMinInterval',
+        'warextSpellLocalDebounce', 'warextSpellLiveWindow'
     }:
         if required_option not in option_ids:
             fail(f'V1.1.0 çalışma modu ayarı eksik: {required_option}')
@@ -178,21 +179,24 @@ def check_runtime(root, version, asset_version):
 
     editor = read_text(runtime / 'editor-v400.js')
     for marker in [
-        "const VERSION = '4.0.0';",
+        "const VERSION = '4.1.0';",
         "const localEnabled = () => cfg.mode === 'local' || cfg.mode === 'hybrid';",
         "const aiEnabled = () => cfg.aiEnabled && cfg.aiEndpoint",
         'new AbortController()',
         'requestIdleCallback',
         "credentials: 'same-origin'",
         "body.set('_xfToken'",
-        'scope.text',
+        "body.set('include_moderation'",
         'localContextForScope',
-        'st.slowUntil = Date.now() + 5000'
+        'st.localGeneration === generation',
+        'cfg.aiMinInterval',
+        'cfg.aiWindow',
+        'st.slowUntil = Date.now() + 6000'
     ]:
         if marker not in editor:
-            fail(f'V4 editör performans/AI özelliği eksik: {marker}')
+            fail(f'V4.1 editör performans/AI özelliği eksik: {marker}')
     if "addEventListener('keyup'" in editor:
-        fail('V4 editör keyup başına ayrı analiz kuyruğu oluşturmamalı')
+        fail('V4.1 editör keyup başına ayrı analiz kuyruğu oluşturmamalı')
 
     semantic = read_text(runtime / 'semantic-reasoning-v310.js')
     for marker in ['externalDependencies:0','propositionGraph:true','entityMemory:true','coreferenceResolution:true','stateLedger:true','selectionalSemantics:true','causalKnowledgeBase:true']:
@@ -210,8 +214,14 @@ def check_runtime(root, version, asset_version):
     for marker in ["const VERSION = '3.1.3';",'MAX_LONGTEXT_SEGMENT = 1000','DEEP_SETTLE_MS = 2400','navigator.scheduling?.isInputPending','settled-hierarchical','boundedMainThread:true','externalDependencies:0']:
         if marker not in guard:
             fail(f'V3.1.3 performans koruma özelliği eksik: {marker}')
+
+    longtext = read_text(runtime / 'longtext-v110.js')
+    for marker in ["const VERSION = '2.1.0';",'INPUT_SETTLE_MS = 1500','MAX_SEGMENTS_PER_SLICE = 2','SLICE_BUDGET_MS = 6','inputPending()','richForTextarea(textarea)']:
+        if marker not in longtext:
+            fail(f'V2.1 uzun metin idle koruması eksik: {marker}')
+
     document = read_text(runtime / 'document-v300.js')
-    for marker in ["const VERSION = '3.1.3';",'DEEP_SETTLE_MS = 2550',"deep && st.mode === 'live-window'",'settled:deep','forceDeep:deep','rangeIndex(el)']:
+    for marker in ["const VERSION = '3.1.3';",'DEEP_SETTLE_MS = 2550','LONG_LIVE_LIMIT = 5000',"deep && st.mode === 'live-window'",'settled:deep','forceDeep:deep','rangeIndex(el)',"wtscDocumentState = 'deferred-long'",'richForTextarea(textarea)']:
         if marker not in document:
             fail(f'V3.1.3 belge denetimi özelliği eksik: {marker}')
 
