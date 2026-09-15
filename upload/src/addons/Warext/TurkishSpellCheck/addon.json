@@ -1,6 +1,6 @@
 {
     "legacy_addon_id": "",
-    "title": "Warext Studios | XenForo Türkçe Yazım Denetimi",
+    "title": "Warext Studios | Türkçe Yazım Denetimi",
     "description": "Türkçe yazım denetimi için üç çalışma modu: Yerel, AI ve AI + Yerel. v1.1.0 ile canlı editör v4 zaman-bütçeli aktif pencere mimarisine geçirilmiştir; uzun metinde her tuşta tam belge taraması yapılmaz, ağır yerel analiz otomatik daraltılır ve arka plan taraması kullanıcı girdisinden ayrılır. AI modunda büyük yerel sözlük/dil modeli paketleri yüklenmez. Hybrid modunda yerel motorun adayları AI'ya bağlam olarak gönderilir; AI yanlış pozitifleri eleyip nihai öneriyi üretir. Warext AI İçerik Denetimi 1.2.0+ kuruluysa aynı provider/model/API bütçesi tek kaynaktan paylaşılabilir; değilse standalone OpenAI veya OpenAI-compatible sağlayıcı kullanılabilir. Eklentiler birbirine zorunlu bağımlı değildir.",
     "version_id": 5400000,
     "version_string": "1.1.0",
