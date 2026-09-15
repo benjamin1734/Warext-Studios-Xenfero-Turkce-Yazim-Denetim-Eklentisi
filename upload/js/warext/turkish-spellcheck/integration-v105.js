@@ -5,7 +5,7 @@
   window.__warextWritingIntegrationV105 = true;
 
   const BRIDGE_VERSION = '1.1.0';
-  const ADDON_VERSION = '1.0.6';
+  const ADDON_VERSION = '1.1.0';
   const STORAGE_KEY = 'warextWritingIntegration:v105';
   const MAX_EVENTS = 40;
   let beforeSnapshot = null;
@@ -58,183 +58,94 @@
       afterLength: b.length,
       removedLength,
       insertedLength,
-      changedChars: Math.max(removedLength, insertedLength)
+      changed: removedLength > 0 || insertedLength > 0,
+      prefix,
+      suffix
     };
   }
 
-  function emptyFieldState() {
-    return { correctionCount:0, changedChars:0, insertedChars:0, removedChars:0 };
-  }
-
-  function normalizeFields(parsed) {
-    const fields = { title:emptyFieldState(), message:emptyFieldState() };
-    if (parsed && typeof parsed === 'object') {
-      for (const name of ['title','message']) {
-        const source = parsed[name];
-        if (!source || typeof source !== 'object') continue;
-        fields[name] = {
-          correctionCount: Math.max(0, Number(source.correctionCount || 0)),
-          changedChars: Math.max(0, Number(source.changedChars || 0)),
-          insertedChars: Math.max(0, Number(source.insertedChars || 0)),
-          removedChars: Math.max(0, Number(source.removedChars || 0))
-        };
-      }
-    }
-    return fields;
-  }
-
-  function deriveFields(events) {
-    const fields = { title:emptyFieldState(), message:emptyFieldState() };
-    for (const event of events) {
-      const name = event?.field === 'title' ? 'title' : 'message';
-      fields[name].correctionCount += 1;
-      fields[name].changedChars += Math.max(0, Number(event?.changedChars || 0));
-      fields[name].insertedChars += Math.max(0, Number(event?.insertedLength || 0));
-      fields[name].removedChars += Math.max(0, Number(event?.removedLength || 0));
-    }
-    return fields;
-  }
-
-  function loadState() {
+  function load() {
     try {
-      const parsed = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
-      const events = Array.isArray(parsed.events) ? parsed.events.slice(-MAX_EVENTS) : [];
-      const fields = parsed.fields && typeof parsed.fields === 'object' ? normalizeFields(parsed.fields) : deriveFields(events);
-      return {
-        sessionId: parsed.sessionId || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
-        firstCorrectionAt: Number(parsed.firstCorrectionAt || 0),
-        lastCorrectionAt: Number(parsed.lastCorrectionAt || 0),
-        correctionCount: Number(parsed.correctionCount || 0),
-        changedChars: Number(parsed.changedChars || 0),
-        insertedChars: Number(parsed.insertedChars || 0),
-        removedChars: Number(parsed.removedChars || 0),
-        fields,
-        events
-      };
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const value = raw ? JSON.parse(raw) : null;
+      return value && typeof value === 'object' ? value : { version: BRIDGE_VERSION, events: [] };
     } catch (_) {
-      return {
-        sessionId: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
-        firstCorrectionAt: 0,
-        lastCorrectionAt: 0,
-        correctionCount: 0,
-        changedChars: 0,
-        insertedChars: 0,
-        removedChars: 0,
-        fields: { title:emptyFieldState(), message:emptyFieldState() },
-        events: []
-      };
+      return { version: BRIDGE_VERSION, events: [] };
     }
   }
 
-  let state = loadState();
-
-  function persist() {
-    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
-  }
-
-  function record(buttonText = '') {
-    if (!beforeSnapshot) return;
-    const after = takeSnapshot();
-    let best = null;
-
-    for (const previous of beforeSnapshot) {
-      const current = after.find(item => item.key === previous.key);
-      if (!current || current.text === previous.text) continue;
-      const delta = diff(previous.text, current.text);
-      if (!best || delta.changedChars > best.delta.changedChars) {
-        best = { previous, current, delta };
-      }
-    }
-
-    beforeSnapshot = null;
-    if (!best || best.delta.changedChars <= 0) return;
-
-    const stamp = now();
-    const field = best.previous.field === 'title' ? 'title' : 'message';
-    const event = {
-      at: stamp,
-      field,
-      beforeLength: best.delta.beforeLength,
-      afterLength: best.delta.afterLength,
-      removedLength: best.delta.removedLength,
-      insertedLength: best.delta.insertedLength,
-      changedChars: best.delta.changedChars,
-      suggestionLength: String(buttonText || '').length
-    };
-
-    if (!state.firstCorrectionAt) state.firstCorrectionAt = stamp;
-    state.lastCorrectionAt = stamp;
-    state.correctionCount += 1;
-    state.changedChars += event.changedChars;
-    state.insertedChars += event.insertedLength;
-    state.removedChars += event.removedLength;
-    state.fields[field].correctionCount += 1;
-    state.fields[field].changedChars += event.changedChars;
-    state.fields[field].insertedChars += event.insertedLength;
-    state.fields[field].removedChars += event.removedLength;
-    state.events.push(event);
-    state.events = state.events.slice(-MAX_EVENTS);
-    persist();
-
+  function save(state) {
     try {
-      document.dispatchEvent(new CustomEvent('warext:writing-checker-correction', { detail: { ...event } }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (_) {}
   }
 
-  function getSummary() {
-    return {
-      bridgeVersion: BRIDGE_VERSION,
-      addonVersion: ADDON_VERSION,
-      sessionId: state.sessionId,
-      correctionCount: state.correctionCount,
-      changedChars: state.changedChars,
-      insertedChars: state.insertedChars,
-      removedChars: state.removedChars,
-      firstCorrectionAt: state.firstCorrectionAt,
-      lastCorrectionAt: state.lastCorrectionAt,
-      fields: {
-        title: { ...state.fields.title },
-        message: { ...state.fields.message }
-      }
-    };
+  function append(event) {
+    const state = load();
+    state.version = BRIDGE_VERSION;
+    state.addonVersion = ADDON_VERSION;
+    state.events = Array.isArray(state.events) ? state.events : [];
+    state.events.push(event);
+    if (state.events.length > MAX_EVENTS) state.events.splice(0, state.events.length - MAX_EVENTS);
+    save(state);
   }
 
-  function reset() {
-    state = {
-      sessionId: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
-      firstCorrectionAt: 0,
-      lastCorrectionAt: 0,
-      correctionCount: 0,
-      changedChars: 0,
-      insertedChars: 0,
-      removedChars: 0,
-      fields: { title:emptyFieldState(), message:emptyFieldState() },
-      events: []
-    };
-    persist();
-  }
-
-  document.addEventListener('mousedown', event => {
-    const button = event.target instanceof Element ? event.target.closest('.wtsc-suggestion') : null;
-    if (!button) return;
+  function captureBefore() {
     beforeSnapshot = takeSnapshot();
-  }, true);
+  }
+
+  function captureAfter() {
+    if (!beforeSnapshot) return;
+    const after = takeSnapshot();
+    const beforeByKey = new Map(beforeSnapshot.map(item => [item.key, item]));
+    const changes = [];
+    for (const item of after) {
+      const previous = beforeByKey.get(item.key);
+      if (!previous) continue;
+      const delta = diff(previous.text, item.text);
+      if (!delta.changed) continue;
+      changes.push({
+        field: item.field,
+        beforeLength: delta.beforeLength,
+        afterLength: delta.afterLength,
+        removedLength: delta.removedLength,
+        insertedLength: delta.insertedLength,
+        changedAt: delta.prefix
+      });
+    }
+    if (changes.length) {
+      append({
+        type: 'writing-edit',
+        at: now(),
+        url: location.pathname,
+        changes
+      });
+    }
+    beforeSnapshot = null;
+  }
+
+  document.addEventListener('submit', captureBefore, true);
+  window.addEventListener('beforeunload', captureAfter, true);
 
   document.addEventListener('click', event => {
-    const button = event.target instanceof Element ? event.target.closest('.wtsc-suggestion') : null;
-    if (!button) return;
-    const label = button.textContent || '';
-    requestAnimationFrame(() => record(label));
+    const target = event.target instanceof Element ? event.target.closest('button,input[type="submit"],a.button') : null;
+    if (!target) return;
+    if (!target.closest('form')) return;
+    captureBefore();
+    setTimeout(captureAfter, 0);
   }, true);
 
-  window.WarextWritingIntegration = Object.freeze({
-    available: true,
-    bridgeVersion: BRIDGE_VERSION,
+  window.WarextWritingIntegration = {
+    version: BRIDGE_VERSION,
     addonVersion: ADDON_VERSION,
-    getSummary,
-    getEvents: () => state.events.map(item => ({ ...item })),
-    reset
-  });
-
-  document.documentElement.dataset.wtscIntegration = BRIDGE_VERSION;
+    snapshot: takeSnapshot,
+    diff,
+    recent(limit = 10) {
+      const state = load();
+      return (Array.isArray(state.events) ? state.events : []).slice(-Math.max(1, Math.min(40, Number(limit) || 10)));
+    },
+    clear() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    }
+  };
 })();
