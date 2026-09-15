@@ -1,5 +1,28 @@
 # Değişiklik Geçmişi
 
+## V1.1.0
+
+- Üç bağımsız çalışma modu eklendi: Yerel, AI ve AI + Yerel destekli
+- Hybrid modda yerel motorun adayları metin bağlamıyla birlikte AI'ya gönderilir; AI yanlış pozitifleri eler ve nihai öneriyi üretir
+- Warext AI İçerik Denetimi V1.2.0+ ile zorunlu bağımlılık oluşturmayan ortak AI sağlayıcı sözleşmesi eklendi
+- Ortak kullanımda seçili provider, model, API anahtarı, bütçe ve kullanım takibi AI İçerik Denetimi üzerinden paylaşılabilir
+- Ortak provider çağrısı aynı anda moderasyon ve Türkçe yazım sonucu döndürebilir
+- Aynı normalize metnin yakın zamanda oluşturulmuş moderasyon sonucu kısa süreli sunucu önbelleğinden tekrar kullanılabilir; gereksiz ikinci provider çağrısı azaltılır
+- Standalone OpenAI Responses API, OpenRouter/OpenAI-compatible, özel OpenAI-compatible ve Ollama yolları eklendi
+- API anahtarları tarayıcıya gönderilmez; istemci yalnız same-origin XenForo endpoint'ine CSRF token ile erişir
+- Canlı editör `editor-v400.js` ile yeniden yazıldı
+- Eski her-girdide geniş belge durumunu senkron çıkaran `editor-v110.js` runtime'dan kaldırıldı
+- Her tuş için ayrı `keyup` analiz kuyruğu kaldırıldı
+- Canlı yerel denetim imleç çevresindeki sınırlı cümle/paragraf penceresine bağlandı
+- Çok uzun metin veya 28 ms üstü analiz algılandığında pencere ve debounce otomatik olarak daha korumacı moda geçer
+- `requestIdleCallback()` ile düşük öncelikli yerel analiz boş zamana taşınır
+- Belge düzeyi semantik katman gecikmeli ve idle yüklenir
+- AI istekleri `AbortController` ile iptal edilebilir hale getirildi; yeni giriş eski isteği sonlandırır
+- Aynı AI çalışma penceresi için kısa süreli istemci önbelleği eklendi
+- AI-only modda ağır yerel sözlük/entity/deyim/dil modeli/semantik paketleri hiç yüklenmez
+- ACP'ye AI kaynağı, provider/model/base URL, timeout, AI karakter sınırları, AI ve yerel debounce ile canlı analiz pencere boyutu ayarları eklendi
+- V4 editör + V3.1.3 performans regresyon sözleşmesi ve release audit kuralları güncellendi
+
 ## V1.0.6
 
 - V3.1.3 uyarlanabilir performans koruma katmanı eklendi
