@@ -12,6 +12,7 @@
   const DEEP_SETTLE_MS = 2550;
   const LIVE_DELAY_MS = 760;
   const MAX_ITEMS = 18;
+  const LONG_LIVE_LIMIT = 5000;
   const states = new WeakMap();
   const stateList = new Set();
   const observedRoots = new WeakSet();
@@ -28,12 +29,31 @@
     return el instanceof HTMLElement && el.isContentEditable && (el.classList.contains('fr-element') || !!el.closest('.fr-box'));
   }
 
+  function richForTextarea(textarea) {
+    if (!(textarea instanceof HTMLTextAreaElement)) return null;
+    const rich = textarea.closest('.js-editor')?.querySelector?.('.fr-box .fr-element[contenteditable="true"]')
+      || textarea.parentElement?.querySelector?.('.fr-box .fr-element[contenteditable="true"]');
+    return rich instanceof HTMLElement && rich.isConnected ? rich : null;
+  }
+
   function editorElements(root = document) {
-    const out = [];
-    if (root instanceof Element && (isMessageTextarea(root) || isRichEditor(root))) out.push(root);
-    root.querySelectorAll?.('textarea[name="message"],textarea.js-editor[data-xf-init~="editor"],.fr-element[contenteditable="true"]').forEach(el => {
-      if (isMessageTextarea(el) || isRichEditor(el)) out.push(el);
-    });
+    const rich = [];
+    const textareas = [];
+    const consider = el => {
+      if (isRichEditor(el)) rich.push(el);
+      else if (isMessageTextarea(el)) textareas.push(el);
+    };
+    if (root instanceof Element) consider(root);
+    root.querySelectorAll?.('textarea[name="message"],textarea.js-editor[data-xf-init~="editor"],.fr-element[contenteditable="true"]').forEach(consider);
+    const out = [...rich];
+    for (const textarea of textareas) {
+      const paired = richForTextarea(textarea);
+      if (paired) {
+        if (!out.includes(paired)) out.push(paired);
+      } else if (textarea.offsetParent !== null) {
+        out.push(textarea);
+      }
+    }
     return [...new Set(out)];
   }
 
@@ -46,6 +66,23 @@
   function inputPending() {
     try { return !!navigator.scheduling?.isInputPending?.({includeContinuous:true}); }
     catch (_) { return false; }
+  }
+
+  function countSentences(text) {
+    const source = String(text || '');
+    if (!source.trim()) return 0;
+    let count = 0;
+    let inSentence = false;
+    for (let i = 0; i < source.length; i++) {
+      const ch = source[i];
+      if (!/\s/u.test(ch)) inSentence = true;
+      if (inSentence && /[.!?…\n]/u.test(ch)) {
+        count++;
+        inSentence = false;
+      }
+    }
+    if (inSentence) count++;
+    return count;
   }
 
   function hash(text,mode) {
@@ -301,8 +338,19 @@
       return;
     }
     const text = snapshot(st.el);
-    const sentenceCount = core.sentenceSegments(text).length;
     const mode = deep ? 'settled-hierarchical' : 'live-window';
+
+    // The v4 editor already owns live caret-window checking. For large content,
+    // document analysis only runs after the user settles; this prevents a second
+    // whole-document traversal while typing.
+    if (!deep && text.length > LONG_LIVE_LIMIT) {
+      st.el.dataset.wtscDocumentState = 'deferred-long';
+      st.el.dataset.wtscDocumentMode = 'settled-only';
+      scheduleDeep(st,DEEP_SETTLE_MS);
+      return;
+    }
+
+    const sentenceCount = countSentences(text);
     st.scanId++;
     const scanId = st.scanId;
     if (text.length < 90 || sentenceCount < 2) {
@@ -360,7 +408,14 @@
   }
 
   function attach(el) {
-    if (!el || states.has(el) || !(isMessageTextarea(el) || isRichEditor(el))) return;
+    if (!el || !(isMessageTextarea(el) || isRichEditor(el))) return;
+    if (el instanceof HTMLTextAreaElement) {
+      const rich = richForTextarea(el);
+      if (rich) return attach(rich);
+      if (el.offsetParent === null) return;
+    }
+    if (states.has(el)) return;
+
     const st = {el,items:[],report:null,sentenceCount:0,mode:'',elapsed:0,lastText:'',liveTimer:0,deepTimer:0,scanId:0,scans:0,cacheHits:0};
     states.set(el,st);
     stateList.add(st);
@@ -374,20 +429,20 @@
     el.addEventListener('input',changed,{passive:true});
     el.addEventListener('paste',() => {
       clearTimeout(st.deepTimer);
-      scheduleLive(st,260);
+      scheduleLive(st,320);
       scheduleDeep(st,DEEP_SETTLE_MS);
     },{passive:true});
     el.addEventListener('cut',() => {
       clearTimeout(st.deepTimer);
-      scheduleLive(st,280);
+      scheduleLive(st,340);
       scheduleDeep(st,DEEP_SETTLE_MS);
     },{passive:true});
-    el.addEventListener('focus',() => scheduleLive(st,900),{passive:true});
+    el.addEventListener('focus',() => scheduleDeep(st,1800),{passive:true});
     el.addEventListener('blur',() => {
       clearTimeout(st.liveTimer);
       scheduleDeep(st,140);
     },{passive:true});
-    scheduleLive(st,1000);
+    scheduleDeep(st,3000);
   }
 
   function observe(root = document) {
@@ -396,8 +451,13 @@
     editorElements(root).forEach(attach);
     const target = root === document ? document.documentElement : root;
     if (!target) return;
+    let mutationTimer = 0;
     const observer = new MutationObserver(mutations => {
-      for (const mutation of mutations) for (const node of mutation.addedNodes) if (node instanceof Element) editorElements(node).forEach(attach);
+      let changed = false;
+      for (const mutation of mutations) for (const node of mutation.addedNodes) if (node instanceof Element) changed = true;
+      if (!changed) return;
+      clearTimeout(mutationTimer);
+      mutationTimer = setTimeout(() => editorElements(root).forEach(attach),100);
     });
     observer.observe(target,{childList:true,subtree:true});
   }
@@ -405,7 +465,7 @@
   function rescan(root = document) {
     editorElements(root).forEach(el => {
       const st = states.get(el);
-      if (st) scheduleDeep(st,60);
+      if (st) scheduleDeep(st,120);
       else attach(el);
     });
   }
@@ -431,6 +491,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',() => observe(document),{once:true});
   else observe(document);
   document.addEventListener('visibilitychange',() => {
-    if (document.visibilityState === 'visible') for (const st of stateList) if (st.el?.isConnected) scheduleDeep(st,180);
+    if (document.visibilityState === 'visible') for (const st of stateList) if (st.el?.isConnected) scheduleDeep(st,400);
   },{passive:true});
 })();
