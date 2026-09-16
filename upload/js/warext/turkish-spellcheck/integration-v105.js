@@ -5,7 +5,7 @@
   window.__warextWritingIntegrationV105 = true;
 
   const BRIDGE_VERSION = '1.1.0';
-  const ADDON_VERSION = '1.0.6';
+  const ADDON_VERSION = '1.1.0';
   const STORAGE_KEY = 'warextWritingIntegration:v105';
   const MAX_EVENTS = 40;
   let beforeSnapshot = null;
@@ -215,13 +215,13 @@
   }
 
   document.addEventListener('mousedown', event => {
-    const button = event.target instanceof Element ? event.target.closest('.wtsc-suggestion') : null;
+    const button = event.target instanceof Element ? event.target.closest('.wtsc-suggestion, .wtsc-v400-suggestion') : null;
     if (!button) return;
     beforeSnapshot = takeSnapshot();
   }, true);
 
   document.addEventListener('click', event => {
-    const button = event.target instanceof Element ? event.target.closest('.wtsc-suggestion') : null;
+    const button = event.target instanceof Element ? event.target.closest('.wtsc-suggestion, .wtsc-v400-suggestion') : null;
     if (!button) return;
     const label = button.textContent || '';
     requestAnimationFrame(() => record(label));

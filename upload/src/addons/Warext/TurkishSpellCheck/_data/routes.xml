@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <routes>
   <route route_type="public" route_prefix="warext-spell-feedback" controller="Warext\TurkishSpellCheck:Feedback"/>
+  <route route_type="public" route_prefix="warext-spell-ai" controller="Warext\TurkishSpellCheck:AiAssist"/>
   <route route_type="admin" route_prefix="warext-spell-learning" controller="Warext\TurkishSpellCheck:Learning" context="warext_spell_learning"/>
 </routes>

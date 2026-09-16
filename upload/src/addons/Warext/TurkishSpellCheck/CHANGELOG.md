@@ -1,5 +1,38 @@
 # Değişiklik Geçmişi
 
+## V1.1.0
+
+- Üç bağımsız çalışma modu eklendi: Yerel, AI ve AI + Yerel destekli
+- Hybrid modda yerel motorun adayları metin bağlamıyla birlikte AI'ya gönderilir; AI yanlış pozitifleri eler ve nihai öneriyi üretir
+- Hybrid adayları editör nesil kimliğiyle eşleştirildi; önceki metin durumundan kalan yerel adayların yeni AI isteğine taşınması engellendi
+- Warext AI İçerik Denetimi V1.2.0+ ile zorunlu bağımlılık oluşturmayan ortak AI sağlayıcı sözleşmesi eklendi
+- Ortak kullanımda seçili provider, model, API anahtarı, bütçe ve kullanım takibi AI İçerik Denetimi üzerinden paylaşılabilir
+- Ortak provider çağrısı yalnız tam yazılmış mesaj kapsamı uygun olduğunda moderasyon + Türkçe yazım sonucunu birlikte döndürebilir; aktif pencere çağrıları gereksiz moderasyon tokenı tüketmez
+- Standalone OpenAI Responses API, OpenRouter/OpenAI-compatible, özel OpenAI-compatible ve Ollama yolları eklendi
+- OpenAI-compatible base URL doğrulaması sıkılaştırıldı; geçersiz protokol ve URL içine gömülü kimlik bilgileri reddedilir
+- API anahtarları tarayıcıya gönderilmez; istemci yalnız same-origin XenForo endpoint'ine CSRF token ile erişir
+- AI endpoint'i ACP çalışma modunu sunucu tarafında zorunlu doğrular; istemci AI kapalıyken doğrudan endpoint çağrısıyla provider tüketemez
+- Canlı editör `editor-v400.js` ile yeniden yazıldı ve V4.1 performans katmanına yükseltildi
+- Eski her-girdide geniş belge durumunu senkron çıkaran `editor-v110.js` runtime'dan kaldırıldı
+- Her tuş için ayrı `keyup` analiz kuyruğu kaldırıldı
+- Canlı yerel denetim imleç çevresindeki sınırlı cümle/paragraf penceresine bağlandı
+- Çok uzun metin veya 24 ms üstü analiz algılandığında pencere ve debounce otomatik olarak daha korumacı moda geçer
+- `requestIdleCallback()` ile düşük öncelikli yerel analiz boş zamana taşınır
+- AI yalnız gerçek input/paste/cut değişikliğinden sonra çalışır; focus ve click tek başına yeni provider sorgusu üretmez
+- AI istekleri arasında ikinci bir minimum süre koruması eklendi; varsayılan 2500 ms
+- Canlı AI çalışma penceresi varsayılan 2200 karakterle sınırlandı; 10.000+ karakter metinde otomatik 1600 karaktere daralır
+- AI istekleri `AbortController` ile iptal edilebilir hale getirildi; yeni metin değişikliği eski isteği sonlandırır
+- Aynı AI çalışma penceresi için kısa süreli istemci önbelleği eklendi
+- AI-only modda ağır yerel sözlük/entity/deyim/dil modeli/semantik paketleri hiç yüklenmez
+- Uzun metin motoru V2.1'e geçirildi; kullanıcı yazarken tam belge taraması yapılmaz, 1500 ms sakinleşme sonrasında idle dilimlerinde ilerler
+- Uzun metin taramasında tek idle dilimi en fazla 2 segment ve yaklaşık 6 ms ana-thread bütçesi kullanır
+- Froala gizli textarea ile görünen contenteditable yüzeyinin iki ayrı editör gibi bağlanması uzun metin ve belge katmanlarında engellendi
+- Belge düzeyi semantik katman 5000+ karakter metinde canlı tam-belge analizini atlar ve yalnız yazım durduktan sonra derin tarama yapar
+- Belge katmanı editör açılışından sonra gecikmeli ve idle yüklenir
+- Standalone yazım AI cevabından gereksiz tam `corrected_text` üretimi kaldırıldı; yalnız hata/düzeltme aralıkları döndürülür
+- ACP'ye AI kaynağı, provider/model/base URL, timeout, AI karakter sınırları, AI ve yerel debounce, canlı analiz pencere boyutu, AI çalışma penceresi ve minimum AI istek aralığı ayarları eklendi
+- V4.1 editör + V2.1 uzun metin + V3.1.3 belge performans regresyon sözleşmesi ve release audit kuralları güncellendi
+
 ## V1.0.6
 
 - V3.1.3 uyarlanabilir performans koruma katmanı eklendi

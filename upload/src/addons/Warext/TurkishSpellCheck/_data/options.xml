@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <options>
   <option option_id="warextSpellEnabled" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="10"/></option>
+  <option option_id="warextSpellMode" edit_format="select" data_type="string" advanced="0"><default_value>local</default_value><edit_format_params>local=Yerel mod
+ai=AI modu
+hybrid=AI + Yerel destekli mod</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="15"/></option>
   <option option_id="warextSpellGrammar" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="20"/></option>
   <option option_id="warextSpellPunctuation" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="30"/></option>
   <option option_id="warextSpellUnderline" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="40"/></option>
@@ -12,7 +15,7 @@
 max=99</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="68"/></option>
   <option option_id="warextSpellFeedback" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="69"/></option>
   <option option_id="warextSpellMaxSuggestions" edit_format="spinbox" data_type="integer" advanced="0"><default_value>3</default_value><edit_format_params>min=1
-max=3</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="70"/></option>
+max=5</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="70"/></option>
   <option option_id="warextSpellLongText" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="75"/></option>
   <option option_id="warextSpellLongTextThreshold" edit_format="spinbox" data_type="integer" advanced="0"><default_value>700</default_value><edit_format_params>min=250
 max=50000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="76"/></option>
@@ -20,6 +23,35 @@ max=50000</edit_format_params><sub_options></sub_options><relation group_id="war
 max=800</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="77"/></option>
   <option option_id="warextSpellLongTextSegmentSize" edit_format="spinbox" data_type="integer" advanced="0"><default_value>1000</default_value><edit_format_params>min=600
 max=5000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="78"/></option>
-  <option option_id="warextSpellCustomWords" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="90"/></option>
-  <option option_id="warextSpellCustomProperNames" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="100"/></option>
+  <option option_id="warextSpellLocalDebounce" edit_format="spinbox" data_type="integer" advanced="1"><default_value>360</default_value><edit_format_params>min=100
+max=2500</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="79"/></option>
+  <option option_id="warextSpellLiveWindow" edit_format="spinbox" data_type="integer" advanced="1"><default_value>1500</default_value><edit_format_params>min=400
+max=4000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="80"/></option>
+
+  <option option_id="warextSpellAiEnabled" edit_format="onoff" data_type="boolean" advanced="0"><default_value>1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="110"/></option>
+  <option option_id="warextSpellAiSource" edit_format="select" data_type="string" advanced="0"><default_value>auto</default_value><edit_format_params>auto=Otomatik: AI İçerik Denetimi varsa paylaş, yoksa standalone
+shared=Yalnız Warext AI İçerik Denetimi ortak sağlayıcısı
+standalone=Yalnız Yazım Denetimi standalone sağlayıcısı</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="120"/></option>
+  <option option_id="warextSpellAiProvider" edit_format="select" data_type="string" advanced="0"><default_value>openai</default_value><edit_format_params>openai=OpenAI Responses API
+openrouter=OpenRouter / OpenAI-compatible
+custom=Özel OpenAI-compatible API
+ollama=Ollama / yerel OpenAI-compatible</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="130"/></option>
+  <option option_id="warextSpellAiBaseUrl" edit_format="textbox" data_type="string" advanced="0"><default_value>https://openrouter.ai/api/v1</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="140"/></option>
+  <option option_id="warextSpellAiKey" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>type=password</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="150"/></option>
+  <option option_id="warextSpellAiModel" edit_format="textbox" data_type="string" advanced="0"><default_value>gpt-5.6-luna</default_value><edit_format_params></edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="160"/></option>
+  <option option_id="warextSpellAiTimeout" edit_format="spinbox" data_type="integer" advanced="1"><default_value>10</default_value><edit_format_params>min=3
+max=30</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="170"/></option>
+  <option option_id="warextSpellAiMaxChars" edit_format="spinbox" data_type="integer" advanced="0"><default_value>8000</default_value><edit_format_params>min=500
+max=50000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="180"/></option>
+  <option option_id="warextSpellAiDebounce" edit_format="spinbox" data_type="integer" advanced="0"><default_value>1500</default_value><edit_format_params>min=700
+max=12000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="190"/></option>
+  <option option_id="warextSpellAiMinChars" edit_format="spinbox" data_type="integer" advanced="0"><default_value>12</default_value><edit_format_params>min=1
+max=1000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="200"/></option>
+  <option option_id="warextSpellAiWindow" edit_format="spinbox" data_type="integer" advanced="0"><default_value>2200</default_value><edit_format_params>min=600
+max=8000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="210"/></option>
+  <option option_id="warextSpellAiMinInterval" edit_format="spinbox" data_type="integer" advanced="1"><default_value>2500</default_value><edit_format_params>min=1000
+max=15000</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="220"/></option>
+
+  <option option_id="warextSpellCustomWords" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="300"/></option>
+  <option option_id="warextSpellCustomProperNames" edit_format="textbox" data_type="string" advanced="0"><default_value></default_value><edit_format_params>rows=8</edit_format_params><sub_options></sub_options><relation group_id="warextSpell" display_order="310"/></option>
 </options>
