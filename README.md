@@ -2,17 +2,112 @@
 
 ## English
 
-Warext Studios Turkish Writing Checker V1.1.0 is a XenForo 2.3+ writing checker with three independent modes: **Local**, **AI**, and **AI + Local assisted**.
+A Turkish spelling, grammar, punctuation, context, and meaning checker for XenForo 2.3+. Starting with V1.1.0, the system provides three independent operating modes: **Local**, **AI**, and **AI + Local assisted**.
 
-Current package: `Warext-Turkce-Yazim-Denetimi-V1.1.0-XenForo.zip`.
+## Current version
 
-Local mode keeps the complete Warext browser-side Turkish language engine and does not make AI requests. AI mode skips the heavy local language packages and uses the server-side AI gateway. Hybrid mode sends bounded, generation-matched local-engine candidates together with the active text context to AI so the model can validate them, remove false positives, choose the contextually correct correction, and add obvious missed issues.
+Current version: **V1.1.0**
 
-When Warext AI Content Inspector V1.2.0+ is installed, both add-ons can share one configured provider/model/API budget without creating a hard add-on dependency. Caret-window requests ask only for writing analysis; moderation is combined only when the complete authored message is being evaluated, so partial editor text is never reused as a full-post moderation score.
+Installation package:
 
-The V4.1 editor runtime replaces the old whole-document live path with a bounded caret-centered analysis window, adaptive slow mode, idle scheduling, request throttling, cancellable AI requests, short-lived client caching, deduplicated Froala surfaces, settled long-text scanning and deferred document-level processing. AI keys remain server-side; the browser calls only the same-origin XenForo endpoint with CSRF protection.
+`Warext-Turkce-Yazim-Denetimi-V1.1.0-XenForo.zip`
 
-No manual SQL import is required. Install or upgrade the package through XenForo ACP → **Add-ons → Install/upgrade from archive**.
+The ZIP can be installed directly through XenForo ACP → **Add-ons → Install/upgrade from archive** or uploaded over an existing installation as an upgrade. No manual SQL import is required.
+
+## Operating modes
+
+### Local mode
+
+All writing checks run in the Warext browser-side local engine. Dictionary, morphology, n-gram, semantic knowledge, contextual spelling, and paragraph-analysis layers remain available. No external AI request is made.
+
+### AI mode
+
+Writing checks run through the server-side AI gateway. In this mode, the large local dictionary, entity, idiom, language-model, and semantic packages are not loaded into the editor, reducing startup and memory usage compared with Local/Hybrid mode. The API key is never sent to the browser.
+
+### AI + Local assisted mode
+
+The local engine first produces candidate writing issues for the active text window. Those candidates are sent to AI together with context that belongs to the same editor/text generation. AI does not blindly accept local candidates; it can remove false positives, choose the contextually correct correction, and add obvious issues missed by the local engine.
+
+## Shared operation with Warext AI Content Inspector
+
+When Warext AI Content Inspector V1.2.0+ is installed, Writing Checker in `auto` mode can share its selected external provider, model, API key, budget, and usage tracking. There is no mandatory XenForo dependency between the two add-ons:
+
+- if only Writing Checker is installed, standalone AI settings or Local-only mode can be used;
+- if only AI Content Inspector is installed, content inspection continues normally;
+- when both are installed, the shared server-side gateway can be used;
+- the active editor window requests writing analysis only and does not waste moderation tokens;
+- when full-message scope is available, the same provider request can produce moderation + writing results together;
+- if the shared layer is disabled or unavailable, `auto` mode can fall back to Writing Checker's standalone provider.
+
+A moderation result produced for a complete message during a shared request may be placed into a short-lived reuse layer. When the same normalized content is submitted, AI Content Inspector can skip a second external-provider request.
+
+## V4.1 long-text and freeze protection
+
+V1.1.0 completely changes the live editor flow. The old path that synchronously scanned the entire rich-text tree and broad context on every input has been removed.
+
+The new runtime:
+
+- does not create a separate `keyup` analysis queue for every key;
+- debounces input;
+- initially analyzes only the active sentence/paragraph window around the caret;
+- automatically narrows the live local-analysis window for very long text;
+- enables a 6-second adaptive slow mode when local analysis takes roughly more than 24 ms;
+- moves low-priority work into idle time with `requestIdleCallback()` when supported;
+- runs AI only after real input/paste/cut changes; focus or click alone does not create provider calls;
+- applies a default 2500 ms minimum interval between live AI requests in addition to debounce;
+- limits the live AI window to 2200 characters by default and narrows it to as little as 1600 characters for 10,000+ character documents;
+- cancels stale AI requests with `AbortController`;
+- uses short-lived client caching for identical text;
+- separates Local/Hybrid long-text scanning from the live typing path and starts it only after input settles;
+- processes at most 2 segments and roughly 6 ms of main-thread budget per idle cycle during long-text scanning;
+- avoids analyzing Froala's hidden textarea and visible contenteditable surface twice at the same time;
+- skips live full-document semantic analysis for 5000+ character documents and performs deep scanning only after typing stops;
+- loads the document-level semantic layer later/idle after editor startup;
+- does not load heavy local dictionary, entity, idiom, language-model, or semantic packages at all in AI-only mode.
+
+The goal of this architecture is not merely to increase debounce time, but to keep work during typing within bounded text-window, time, and request budgets.
+
+## Standalone AI providers
+
+When Writing Checker is used by itself, these provider paths are supported:
+
+- OpenAI Responses API
+- OpenRouter / OpenAI-compatible API
+- custom OpenAI-compatible endpoint
+- Ollama / local OpenAI-compatible endpoint
+
+Custom OpenAI-compatible URLs accept only HTTP/HTTPS and reject embedded usernames/passwords. When OpenRouter is selected, the official endpoint is used. Provider URLs and API keys remain on the XenForo server. The browser only calls the same-origin XenForo `warext-spell-ai/analyze` endpoint with a CSRF token. The server also rejects direct endpoint requests when AI mode is disabled in ACP.
+
+To avoid unnecessary token use, AI responses do not rewrite the whole text; they return only detected issue locations and correction suggestions.
+
+## Local engine
+
+Local/Hybrid modes preserve the existing V3.1.x engine: dictionary and morphology, proper-name/apostrophe rules, compound/separate spelling, colloquial usage, punctuation, syntax, n-gram, semantic roles, verb valency, proposition graph, contextual multi-letter repair, long-text segments, and document-level semantic checks can all be used.
+
+## Administration options
+
+ACP allows separate management of operating mode, AI source, standalone provider/model/base URL, timeout, AI minimum/maximum characters, AI debounce, live AI window, minimum AI request interval, local debounce, live local-analysis window size, semantic sensitivity, long-text limits, custom dictionary, and custom proper-name lists.
+
+## Installation note
+
+If the XenForo archive installer is disabled, add this to `src/config.php`:
+
+```php
+$config['enableAddOnArchiveInstaller'] = true;
+```
+
+Add-on tables are managed automatically during installation and upgrades.
+
+## Quality validation
+
+The release pipeline runs `node --check` for all runtime JavaScript files, `php -l` for all PHP files, XML/JSON validation, dictionary and language-engine regressions, long-text tests, the V3.1.3 performance contract, and the V4.1 editor/AI mode contract. A package is produced only after these checks pass.
+
+## Repository structure
+
+- `upload/`: files installed into XenForo
+- `source/`: production sources for the local language engine
+- `tests/`: regression, benchmark, and performance tests
+- `tools/`: build and validation tools
 
 ## Support
 
