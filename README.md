@@ -1,4 +1,6 @@
-# Warext Studios | Türkçe Yazım Denetimi
+# Warext Studios | XenForo Turkish Writing Checker
+
+## Türkçe
 
 XenForo 2.3+ için Türkçe yazım, dilbilgisi, noktalama, bağlam ve anlam denetimi eklentisi. V1.1.0 ile sistem **Yerel**, **AI** ve **AI + Yerel destekli** olmak üzere üç ayrı çalışma moduna sahiptir.
 
@@ -107,9 +109,15 @@ Release hattı bütün runtime JavaScript dosyalarında `node --check`, bütün 
 - `tests/`: regresyon, benchmark ve performans testleri
 - `tools/`: derleme ve doğrulama araçları
 
+## Destek
+
+Sorularınız, hata bildirimleriniz, kurulum desteği ve Warext Studios XenForo eklentileriyle ilgili yardım için destek Discord sunucumuza katılabilirsiniz:
+
+**Discord:** https://discord.gg/tgsV5XMcFS
+
 ---
 
-# English
+## English
 
 Warext Studios Turkish Writing Checker V1.1.0 is a XenForo 2.3+ writing checker with three independent modes: **Local**, **AI**, and **AI + Local assisted**.
 
@@ -122,3 +130,9 @@ When Warext AI Content Inspector V1.2.0+ is installed, both add-ons can share on
 The V4.1 editor runtime replaces the old whole-document live path with a bounded caret-centered analysis window, adaptive slow mode, idle scheduling, request throttling, cancellable AI requests, short-lived client caching, deduplicated Froala surfaces, settled long-text scanning and deferred document-level processing. AI keys remain server-side; the browser calls only the same-origin XenForo endpoint with CSRF protection.
 
 No manual SQL import is required. Install or upgrade the package through XenForo ACP → **Add-ons → Install/upgrade from archive**.
+
+## Support
+
+For questions, bug reports, installation support, and help with Warext Studios XenForo add-ons, you can join our support Discord server:
+
+**Discord:** https://discord.gg/tgsV5XMcFS
