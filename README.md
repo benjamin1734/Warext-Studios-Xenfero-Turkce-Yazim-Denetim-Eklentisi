@@ -1,5 +1,27 @@
 # Warext Studios | XenForo Turkish Writing Checker
 
+## English
+
+Warext Studios Turkish Writing Checker V1.1.0 is a XenForo 2.3+ writing checker with three independent modes: **Local**, **AI**, and **AI + Local assisted**.
+
+Current package: `Warext-Turkce-Yazim-Denetimi-V1.1.0-XenForo.zip`.
+
+Local mode keeps the complete Warext browser-side Turkish language engine and does not make AI requests. AI mode skips the heavy local language packages and uses the server-side AI gateway. Hybrid mode sends bounded, generation-matched local-engine candidates together with the active text context to AI so the model can validate them, remove false positives, choose the contextually correct correction, and add obvious missed issues.
+
+When Warext AI Content Inspector V1.2.0+ is installed, both add-ons can share one configured provider/model/API budget without creating a hard add-on dependency. Caret-window requests ask only for writing analysis; moderation is combined only when the complete authored message is being evaluated, so partial editor text is never reused as a full-post moderation score.
+
+The V4.1 editor runtime replaces the old whole-document live path with a bounded caret-centered analysis window, adaptive slow mode, idle scheduling, request throttling, cancellable AI requests, short-lived client caching, deduplicated Froala surfaces, settled long-text scanning and deferred document-level processing. AI keys remain server-side; the browser calls only the same-origin XenForo endpoint with CSRF protection.
+
+No manual SQL import is required. Install or upgrade the package through XenForo ACP → **Add-ons → Install/upgrade from archive**.
+
+## Support
+
+For questions, bug reports, installation support, and help with Warext Studios XenForo add-ons, you can join our support Discord server:
+
+**Discord:** https://discord.gg/tgsV5XMcFS
+
+---
+
 ## Türkçe
 
 XenForo 2.3+ için Türkçe yazım, dilbilgisi, noktalama, bağlam ve anlam denetimi eklentisi. V1.1.0 ile sistem **Yerel**, **AI** ve **AI + Yerel destekli** olmak üzere üç ayrı çalışma moduna sahiptir.
@@ -112,27 +134,5 @@ Release hattı bütün runtime JavaScript dosyalarında `node --check`, bütün 
 ## Destek
 
 Sorularınız, hata bildirimleriniz, kurulum desteği ve Warext Studios XenForo eklentileriyle ilgili yardım için destek Discord sunucumuza katılabilirsiniz:
-
-**Discord:** https://discord.gg/tgsV5XMcFS
-
----
-
-## English
-
-Warext Studios Turkish Writing Checker V1.1.0 is a XenForo 2.3+ writing checker with three independent modes: **Local**, **AI**, and **AI + Local assisted**.
-
-Current package: `Warext-Turkce-Yazim-Denetimi-V1.1.0-XenForo.zip`.
-
-Local mode keeps the complete Warext browser-side Turkish language engine and does not make AI requests. AI mode skips the heavy local language packages and uses the server-side AI gateway. Hybrid mode sends bounded, generation-matched local-engine candidates together with the active text context to AI so the model can validate them, remove false positives, choose the contextually correct correction, and add obvious missed issues.
-
-When Warext AI Content Inspector V1.2.0+ is installed, both add-ons can share one configured provider/model/API budget without creating a hard add-on dependency. Caret-window requests ask only for writing analysis; moderation is combined only when the complete authored message is being evaluated, so partial editor text is never reused as a full-post moderation score.
-
-The V4.1 editor runtime replaces the old whole-document live path with a bounded caret-centered analysis window, adaptive slow mode, idle scheduling, request throttling, cancellable AI requests, short-lived client caching, deduplicated Froala surfaces, settled long-text scanning and deferred document-level processing. AI keys remain server-side; the browser calls only the same-origin XenForo endpoint with CSRF protection.
-
-No manual SQL import is required. Install or upgrade the package through XenForo ACP → **Add-ons → Install/upgrade from archive**.
-
-## Support
-
-For questions, bug reports, installation support, and help with Warext Studios XenForo add-ons, you can join our support Discord server:
 
 **Discord:** https://discord.gg/tgsV5XMcFS
