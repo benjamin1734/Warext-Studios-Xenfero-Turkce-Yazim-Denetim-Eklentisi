@@ -4,16 +4,6 @@
 
 A Turkish spelling, grammar, punctuation, context, and meaning checker for XenForo 2.3+. Starting with V1.1.0, the system provides three independent operating modes: **Local**, **AI**, and **AI + Local assisted**.
 
-## Current version
-
-Current version: **V1.1.0**
-
-Installation package:
-
-`Warext-Turkce-Yazim-Denetimi-V1.1.0-XenForo.zip`
-
-The ZIP can be installed directly through XenForo ACP → **Add-ons → Install/upgrade from archive** or uploaded over an existing installation as an upgrade. No manual SQL import is required.
-
 ## Operating modes
 
 ### Local mode
@@ -30,7 +20,7 @@ The local engine first produces candidate writing issues for the active text win
 
 ## Shared operation with Warext AI Content Inspector
 
-When Warext AI Content Inspector V1.2.0+ is installed, Writing Checker in `auto` mode can share its selected external provider, model, API key, budget, and usage tracking. There is no mandatory XenForo dependency between the two add-ons:
+When a compatible Warext AI Content Inspector is installed, Writing Checker in `auto` mode can share its selected external provider, model, API key, budget, and usage tracking. There is no mandatory XenForo dependency between the two add-ons:
 
 - if only Writing Checker is installed, standalone AI settings or Local-only mode can be used;
 - if only AI Content Inspector is installed, content inspection continues normally;
@@ -41,9 +31,9 @@ When Warext AI Content Inspector V1.2.0+ is installed, Writing Checker in `auto`
 
 A moderation result produced for a complete message during a shared request may be placed into a short-lived reuse layer. When the same normalized content is submitted, AI Content Inspector can skip a second external-provider request.
 
-## V4.1 long-text and freeze protection
+## Long-text and freeze protection
 
-V1.1.0 completely changes the live editor flow. The old path that synchronously scanned the entire rich-text tree and broad context on every input has been removed.
+The live editor flow is designed to avoid full synchronous rescans on every input. The old path that synchronously scanned the entire rich-text tree and broad context on every input has been removed.
 
 The new runtime:
 
@@ -121,16 +111,6 @@ For questions, bug reports, installation support, and help with Warext Studios X
 
 XenForo 2.3+ için Türkçe yazım, dilbilgisi, noktalama, bağlam ve anlam denetimi eklentisi. V1.1.0 ile sistem **Yerel**, **AI** ve **AI + Yerel destekli** olmak üzere üç ayrı çalışma moduna sahiptir.
 
-## Güncel sürüm
-
-Güncel sürüm: **V1.1.0**
-
-Kurulum paketi:
-
-`Warext-Turkce-Yazim-Denetimi-V1.1.0-XenForo.zip`
-
-ZIP dosyası XenForo ACP → **Add-ons → Install/upgrade from archive** alanından doğrudan kurulabilir veya mevcut sürümün üzerine yükseltilebilir. Manuel SQL içe aktarma gerekmez.
-
 ## Çalışma modları
 
 ### Yerel mod
@@ -147,7 +127,7 @@ Yerel motor önce aktif metin penceresinde aday yazım sorunlarını üretir. Bu
 
 ## Warext AI İçerik Denetimi ile ortak çalışma
 
-Warext AI İçerik Denetimi V1.2.0+ kuruluysa Yazım Denetimi `auto` modunda onun seçili harici sağlayıcısını, modelini, API anahtarını, bütçe ve kullanım takibini paylaşabilir. İki eklenti arasında zorunlu XenForo bağımlılığı yoktur:
+Uyumlu Warext AI İçerik Denetimi kuruluysa Yazım Denetimi `auto` modunda onun seçili harici sağlayıcısını, modelini, API anahtarını, bütçe ve kullanım takibini paylaşabilir. İki eklenti arasında zorunlu XenForo bağımlılığı yoktur:
 
 - yalnız Yazım Denetimi kuruluysa standalone AI ayarları veya yalnız Yerel mod kullanılabilir;
 - yalnız AI İçerik Denetimi kuruluysa içerik denetimi normal şekilde çalışır;
@@ -158,9 +138,9 @@ Warext AI İçerik Denetimi V1.2.0+ kuruluysa Yazım Denetimi `auto` modunda onu
 
 Ortak çağrıda tam mesaj için üretilen moderasyon sonucu kısa süreli tekrar kullanım katmanına bırakılabilir. Aynı normalize içerik gönderildiğinde AI İçerik Denetimi ikinci harici provider isteğini atlayabilir.
 
-## V4.1 uzun metin ve donma koruması
+## Uzun metin ve donma koruması
 
-V1.1.0 canlı editör akışı tamamen değiştirildi. Eski editörün her girişte bütün zengin metin ağacını ve geniş bağlamı senkron tarayan yolu kaldırıldı.
+Canlı editör akışı, her girişte tam senkron tarama yapmayacak şekilde tasarlanmıştır. Eski editörün her girişte bütün zengin metin ağacını ve geniş bağlamı senkron tarayan yolu kaldırıldı.
 
 Yeni runtime:
 
